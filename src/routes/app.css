@@ -1,0 +1,19 @@
+.sidebar-menu a {
+  text-decoration: none;
+  color: var(--bs-body-color);
+}
+
+.sidebar-menu a:hover {
+  text-decoration: underline;
+}
+
+.sidebar-menu ul {
+  padding-left: 0;
+  list-style: none;
+  margin-top: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.sidebar-menu li {
+  margin-bottom: 0.25rem;
+}

@@ -1,0 +1,15 @@
+diff --git a/node_modules/@sveltestrap/sveltestrap/dist/Input/Input.d.ts b/node_modules/@sveltestrap/sveltestrap/dist/Input/Input.d.ts
+index 976fc00..ae33f35 100644
+--- a/node_modules/@sveltestrap/sveltestrap/dist/Input/Input.d.ts
++++ b/node_modules/@sveltestrap/sveltestrap/dist/Input/Input.d.ts
+@@ -1,8 +1,8 @@
+ import { SvelteComponent } from 'svelte';
+-import { HTMLInputAttributes } from 'svelte/elements';
++import { HTMLInputAttributes, HTMLSelectAttributes, HTMLTextareaAttributes } from 'svelte/elements';
+ import { Color } from '../shared';
+ 
+-export interface InputProps extends HTMLInputAttributes {
++export interface InputProps extends HTMLInputAttributes, HTMLSelectAttributes, HTMLTextareaAttributes {
+   bsSize?: 'lg' | 'sm';
+   color?: Color;
+   feedback?: string | string[];

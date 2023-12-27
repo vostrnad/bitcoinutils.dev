@@ -21,6 +21,11 @@ module.exports = {
       parserOptions: {
         parser: '@typescript-eslint/parser',
       },
+      rules: {
+        '@typescript-eslint/no-unsafe-argument': 0,
+        'import/no-mutable-exports': 0,
+        'unicorn/filename-case': 0,
+      },
     },
   ],
 }
