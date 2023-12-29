@@ -23,6 +23,8 @@
         <li>
           <strong>Encoding</strong>
           <ul>
+            <li><a href="ascii">ASCII</a></li>
+            <li><a href="utf8">UTF-8</a></li>
             <li><a href="bech32">Bech32</a></li>
             <li><a href="bech32m">Bech32m</a></li>
           </ul>
