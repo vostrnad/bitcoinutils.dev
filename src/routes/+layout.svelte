@@ -20,6 +20,13 @@
             <li><a href="sha1">SHA1</a></li>
           </ul>
         </li>
+        <li>
+          <strong>Encoding</strong>
+          <ul>
+            <li><a href="bech32">Bech32</a></li>
+            <li><a href="bech32m">Bech32m</a></li>
+          </ul>
+        </li>
       </ul>
     </div>
     <div class="flex-grow-1 p-5"><slot /></div>

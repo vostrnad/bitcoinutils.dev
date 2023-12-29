@@ -1,14 +1,11 @@
 <script lang="ts">
   import { Input } from '@sveltestrap/sveltestrap'
   import { hexToUint8Array, uint8ArrayToHex } from '$lib/uintarray'
+  import { isValidHex } from '$lib/validation'
 
   export let hash: (input: string | Uint8Array) => Uint8Array
   export let title: string
   export let description: string
-
-  const isValidHex = (hex: string) => {
-    return hex.length % 2 === 0 && /^[\da-f]*$/i.test(hex)
-  }
 
   let type = 'utf8'
   let input = ''
@@ -38,12 +35,13 @@
 <Input
   class="font-monospace"
   type="textarea"
+  spellcheck={false}
   rows={3}
   invalid={!isValid}
   bind:value={input}
 />
 <p
-  class="font-monospace mt-3 p-3 rounded"
+  class="font-monospace mt-3 p-3 rounded text-break"
   class:bg-success-subtle={isValid}
   class:bg-danger-subtle={!isValid}
 >
