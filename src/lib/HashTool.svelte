@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Input } from '@sveltestrap/sveltestrap'
+  import { FormGroup, Input } from '@sveltestrap/sveltestrap'
+  import Output from '$lib/Output.svelte'
   import { hexToUint8Array, uint8ArrayToHex } from '$lib/uintarray'
   import { isValidHex } from '$lib/validation'
 
@@ -28,22 +29,26 @@
 
 <h2 class="mb-3">{title}</h2>
 <p>{description}</p>
-<Input class="w-auto mb-3" type="select" bind:value={type}>
-  <option value="utf8">UTF-8</option>
-  <option value="hex">Hex</option>
-</Input>
-<Input
-  class="font-monospace"
-  type="textarea"
-  spellcheck={false}
-  rows={3}
-  invalid={!isValid}
-  bind:value={input}
+
+<FormGroup class="mb-3">
+  <Input class="w-auto" type="select" bind:value={type}>
+    <option value="utf8">UTF-8</option>
+    <option value="hex">Hex</option>
+  </Input>
+</FormGroup>
+
+<FormGroup class="mb-3">
+  <Input
+    class="font-monospace"
+    type="textarea"
+    spellcheck={false}
+    rows={3}
+    invalid={!isValid}
+    bind:value={input}
+  />
+</FormGroup>
+
+<Output
+  invalidReason={!isValid ? 'Input is not valid hex' : undefined}
+  {output}
 />
-<p
-  class="font-monospace mt-3 p-3 rounded text-break"
-  class:bg-success-subtle={isValid}
-  class:bg-danger-subtle={!isValid}
->
-  {!isValid ? 'Error: Input is not valid hex.' : output}
-</p>

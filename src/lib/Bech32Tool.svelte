@@ -1,6 +1,7 @@
 <script lang="ts">
   import { bech32, bech32m } from '@scure/base'
   import { FormGroup, Input, Label } from '@sveltestrap/sveltestrap'
+  import Output from '$lib/Output.svelte'
   import { bech32TextToWords, bech32WordsToText } from '$lib/bech32'
   import { hexToUint8Array, uint8ArrayToHex } from '$lib/uintarray'
   import {
@@ -172,6 +173,7 @@
 </script>
 
 <h2 class="mb-3">{encodingName}</h2>
+
 <FormGroup class="mb-3">
   <Label>Human-readable part</Label>
   <Input
@@ -226,10 +228,4 @@
   />
 </FormGroup>
 
-<p
-  class="font-monospace p-3 rounded text-break"
-  class:bg-success-subtle={!invalidReason}
-  class:bg-danger-subtle={Boolean(invalidReason)}
->
-  {invalidReason ? `Error: ${invalidReason}.` : output}
-</p>
+<Output {invalidReason} {output} />
