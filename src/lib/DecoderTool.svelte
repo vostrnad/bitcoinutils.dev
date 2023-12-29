@@ -1,5 +1,6 @@
 <script lang="ts">
   import { FormGroup, Input } from '@sveltestrap/sveltestrap'
+  import { decoderInput as input } from './stores/inputs'
   import Output from '$lib/Output.svelte'
   import { hexToUint8Array } from '$lib/uintarray'
   import { isValidHex } from '$lib/validation'
@@ -8,14 +9,13 @@
   export let name: string
   export let description: string
 
-  let input = ''
   let output: string
   let isValid: boolean
   $: {
-    input = input.trim()
-    isValid = isValidHex(input)
+    $input = $input.trim()
+    isValid = isValidHex($input)
     if (isValid) {
-      output = new TextDecoder(encoding).decode(hexToUint8Array(input))
+      output = new TextDecoder(encoding).decode(hexToUint8Array($input))
     }
   }
 </script>
@@ -30,7 +30,7 @@
     spellcheck={false}
     rows={3}
     invalid={!isValid}
-    bind:value={input}
+    bind:value={$input}
   />
 </FormGroup>
 

@@ -3,6 +3,14 @@
   import { FormGroup, Input, Label } from '@sveltestrap/sveltestrap'
   import Output from '$lib/Output.svelte'
   import { bech32TextToWords, bech32WordsToText } from '$lib/bech32'
+  import {
+    bech32Input,
+    hexInput,
+    hrpInput as hrp,
+    invalidBech32InputReason as invalidInputReason,
+    invalidBech32InputType as invalidInputType,
+    versionNumberInput as versionNumber,
+  } from '$lib/stores/inputs'
   import { hexToUint8Array, uint8ArrayToHex } from '$lib/uintarray'
   import {
     isValidBech32Data,
@@ -12,6 +20,9 @@
 
   export let encoding: 'bech32' | 'bech32m'
 
+  const segwitPrefixes = ['bc', 'tb', 'bcrt']
+  const silentPaymentsPrefixes = ['sp', 'tsp', 'sprt']
+
   let encodingName: string
   let encoder: typeof bech32 | typeof bech32m
   $: {
@@ -19,46 +30,52 @@
     encoder = encoding === 'bech32' ? bech32 : bech32m
   }
 
-  let versionNumber: number | null = encoding === 'bech32' ? 0 : 1
+  if (segwitPrefixes.includes($hrp.toLowerCase())) {
+    if (encoding === 'bech32' && $versionNumber === 1) {
+      $versionNumber = 0
+    }
+    if (encoding === 'bech32m' && $versionNumber === 0) {
+      $versionNumber = 1
+    }
+  }
+
   let invalidVersionReason: string | undefined
 
   $: {
-    if (typeof versionNumber === 'number') {
-      if (versionNumber > 31) versionNumber = 31
-      if (versionNumber < 0) versionNumber = 0
-      if (!Number.isInteger(versionNumber)) {
-        versionNumber = Math.floor(versionNumber)
+    if (typeof $versionNumber === 'number') {
+      if ($versionNumber > 31) $versionNumber = 31
+      if ($versionNumber < 0) $versionNumber = 0
+      if (!Number.isInteger($versionNumber)) {
+        $versionNumber = Math.floor($versionNumber)
       }
-      if (Number.isNaN(versionNumber)) versionNumber = null
+      if (Number.isNaN($versionNumber)) $versionNumber = null
     }
 
     invalidVersionReason = undefined
-    if (typeof versionNumber === 'number') {
-      if (['bc', 'tb', 'bcrt'].includes(hrp.toLowerCase())) {
-        if (encoding === 'bech32' && versionNumber !== 0) {
+    if (typeof $versionNumber === 'number') {
+      if (segwitPrefixes.includes($hrp.toLowerCase())) {
+        if (encoding === 'bech32' && $versionNumber !== 0) {
           invalidVersionReason = 'SegWit versions higher than 0 use Bech32m'
         }
-        if (encoding === 'bech32m' && versionNumber === 0) {
+        if (encoding === 'bech32m' && $versionNumber === 0) {
           invalidVersionReason = 'SegWit version 0 uses Bech32'
         }
-        if (encoding === 'bech32m' && versionNumber > 16) {
+        if (encoding === 'bech32m' && $versionNumber > 16) {
           invalidVersionReason = 'SegWit versions only go up to 16'
         }
       }
     }
   }
 
-  let hrp = 'bc'
-  let hexInput = ''
-  let bech32Input = ''
-
-  $: hrp = hrp.trim()
+  $: $hrp = $hrp.trim()
 
   let inputUint8Array = new Uint8Array()
 
+  if (!$invalidInputReason && isValidHex($hexInput)) {
+    inputUint8Array = hexToUint8Array($hexInput)
+  }
+
   let output: string | undefined
-  let invalidInputType: 'hex' | 'bech32' | undefined
-  let invalidInputReason: string | undefined
 
   let invalidReason: string | undefined
   let invalidHrpReason: string | undefined
@@ -67,31 +84,31 @@
     invalidReason = undefined
     invalidHrpReason = undefined
 
-    const hrpHasInvalidCharacters = !isValidBech32Hrp(hrp)
-    if (hrp.length === 0) {
+    const hrpHasInvalidCharacters = !isValidBech32Hrp($hrp)
+    if ($hrp.length === 0) {
       invalidHrpReason = 'Human-readable part cannot be empty'
     } else if (hrpHasInvalidCharacters) {
       invalidHrpReason = ''
       invalidReason = 'Human-readable part has invalid characters'
-    } else if (hrp.length > 83) {
+    } else if ($hrp.length > 83) {
       invalidHrpReason = 'Human-readable part is too long'
     } else if (
-      ['sp', 'tsp', 'sprt'].includes(hrp.toLowerCase()) &&
-      encoding === 'bech32'
+      encoding === 'bech32' &&
+      silentPaymentsPrefixes.includes($hrp.toLowerCase())
     ) {
       invalidHrpReason = 'Silent payment addresses use Bech32m'
     }
 
-    if (invalidInputReason && !invalidReason) {
-      invalidReason = invalidInputReason
+    if ($invalidInputReason && !invalidReason) {
+      invalidReason = $invalidInputReason
     }
 
     if (!invalidReason) {
       let words = encoder.toWords(inputUint8Array)
-      if (typeof versionNumber === 'number') {
-        words = [versionNumber, ...words]
+      if (typeof $versionNumber === 'number') {
+        words = [$versionNumber, ...words]
       }
-      output = encoder.encode(hrp, words, false)
+      output = encoder.encode($hrp, words, false)
     }
   }
 
@@ -125,16 +142,16 @@
       currentTarget: EventTarget & HTMLInputElement
     },
   ) => {
-    hexInput = e.currentTarget.value.trim()
-    if (isValidHex(hexInput)) {
-      inputUint8Array = hexToUint8Array(hexInput)
-      bech32Input = bech32WordsToText(encoder.toWords(inputUint8Array))
-      invalidInputType = undefined
-      invalidInputReason = undefined
+    $hexInput = e.currentTarget.value.trim()
+    if (isValidHex($hexInput)) {
+      inputUint8Array = hexToUint8Array($hexInput)
+      $bech32Input = bech32WordsToText(encoder.toWords(inputUint8Array))
+      $invalidInputType = undefined
+      $invalidInputReason = undefined
     } else {
-      bech32Input = ''
-      invalidInputType = 'hex'
-      invalidInputReason = 'Input is not valid hex'
+      $bech32Input = ''
+      $invalidInputType = 'hex'
+      $invalidInputReason = 'Input is not valid hex'
     }
   }
 
@@ -143,31 +160,31 @@
       currentTarget: EventTarget & HTMLInputElement
     },
   ) => {
-    bech32Input = e.currentTarget.value.trim()
-    if (isValidBech32Data(bech32Input)) {
-      const words = bech32TextToWords(bech32Input)
+    $bech32Input = e.currentTarget.value.trim()
+    if (isValidBech32Data($bech32Input)) {
+      const words = bech32TextToWords($bech32Input)
       try {
         inputUint8Array = encoder.fromWords(words)
-        hexInput = uint8ArrayToHex(inputUint8Array)
-        invalidInputType = undefined
-        invalidInputReason = undefined
+        $hexInput = uint8ArrayToHex(inputUint8Array)
+        $invalidInputType = undefined
+        $invalidInputReason = undefined
       } catch (error) {
-        hexInput = ''
-        invalidInputType = 'bech32'
+        $hexInput = ''
+        $invalidInputType = 'bech32'
         if (error instanceof Error) {
           let errorMessage = error.message
           if (/^Non-zero padding: \d+$/.test(error.message)) {
             errorMessage = 'Non-zero padding'
           }
-          invalidInputReason = errorMessage
+          $invalidInputReason = errorMessage
         } else {
-          invalidInputReason = `Input is not valid ${encodingName}`
+          $invalidInputReason = `Input is not valid ${encodingName}`
         }
       }
     } else {
-      hexInput = ''
-      invalidInputType = 'bech32'
-      invalidInputReason = `Invalid characters in ${encodingName} input`
+      $hexInput = ''
+      $invalidInputType = 'bech32'
+      $invalidInputReason = `Invalid characters in ${encodingName} input`
     }
   }
 </script>
@@ -182,7 +199,7 @@
     spellcheck={false}
     invalid={invalidHrpReason !== undefined}
     feedback={invalidHrpReason}
-    bind:value={hrp}
+    bind:value={$hrp}
   />
 </FormGroup>
 
@@ -196,7 +213,7 @@
     step={1}
     invalid={invalidVersionReason !== undefined}
     feedback={invalidVersionReason}
-    bind:value={versionNumber}
+    bind:value={$versionNumber}
     on:input={handleVersionInput}
     on:keydown={handleVersionKeyDown}
   />
@@ -209,8 +226,8 @@
     type="textarea"
     spellcheck={false}
     rows={3}
-    invalid={invalidInputType === 'hex'}
-    bind:value={hexInput}
+    invalid={$invalidInputType === 'hex'}
+    bind:value={$hexInput}
     on:input={handleHexInput}
   />
 </FormGroup>
@@ -222,8 +239,8 @@
     type="textarea"
     spellcheck={false}
     rows={3}
-    invalid={invalidInputType === 'bech32'}
-    bind:value={bech32Input}
+    invalid={$invalidInputType === 'bech32'}
+    bind:value={$bech32Input}
     on:input={handleBech32Input}
   />
 </FormGroup>

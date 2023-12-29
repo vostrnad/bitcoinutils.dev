@@ -1,5 +1,6 @@
 <script lang="ts">
   import { FormGroup, Input } from '@sveltestrap/sveltestrap'
+  import { hashInput as input, hashInputType as type } from './stores/inputs'
   import Output from '$lib/Output.svelte'
   import { hexToUint8Array, uint8ArrayToHex } from '$lib/uintarray'
   import { isValidHex } from '$lib/validation'
@@ -8,20 +9,18 @@
   export let title: string
   export let description: string
 
-  let type = 'utf8'
-  let input = ''
   let output: string
   let isValid: boolean
   $: {
-    if (type === 'hex') input = input.trim()
-    isValid = type !== 'hex' || isValidHex(input)
+    if ($type === 'hex') $input = $input.trim()
+    isValid = $type !== 'hex' || isValidHex($input)
     if (isValid) {
-      switch (type) {
+      switch ($type) {
         case 'hex':
-          output = uint8ArrayToHex(hash(hexToUint8Array(input)))
+          output = uint8ArrayToHex(hash(hexToUint8Array($input)))
           break
         default:
-          output = uint8ArrayToHex(hash(input))
+          output = uint8ArrayToHex(hash($input))
       }
     }
   }
@@ -31,7 +30,7 @@
 <p>{description}</p>
 
 <FormGroup class="mb-3">
-  <Input class="w-auto" type="select" bind:value={type}>
+  <Input class="w-auto" type="select" bind:value={$type}>
     <option value="utf8">UTF-8</option>
     <option value="hex">Hex</option>
   </Input>
@@ -44,7 +43,7 @@
     spellcheck={false}
     rows={3}
     invalid={!isValid}
-    bind:value={input}
+    bind:value={$input}
   />
 </FormGroup>
 
