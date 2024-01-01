@@ -1,36 +1,48 @@
 <script lang="ts">
   import './app.css'
-  import { Container, Navbar, NavbarBrand } from '@sveltestrap/sveltestrap'
+  import {
+    Container,
+    Navbar,
+    NavbarBrand,
+    NavbarToggler,
+    Offcanvas,
+  } from '@sveltestrap/sveltestrap'
+  import { navigating } from '$app/stores'
+  import SidebarMenu from '$lib/SidebarMenu.svelte'
+
+  let sidebarOpen = false
+  const toggleSidebar = () => (sidebarOpen = !sidebarOpen)
+
+  $: if ($navigating) sidebarOpen = false
 </script>
 
-<Navbar container color="light" class="shadow-sm">
-  <NavbarBrand href="/">bitcoinutils.dev</NavbarBrand>
+<Navbar container={false} expand="md" color="light" class="shadow-sm">
+  <Container md class="justify-content-start">
+    <NavbarToggler class="me-3" on:click={toggleSidebar} />
+    <NavbarBrand href="/">bitcoinutils.dev</NavbarBrand>
+  </Container>
 </Navbar>
-<Container>
+
+<Container md>
   <div class="d-flex">
-    <div class="sidebar-menu p-3">
-      <ul>
-        <li>
-          <strong>Cryptography</strong>
-          <ul>
-            <li><a href="sha256">SHA256</a></li>
-            <li><a href="ripemd160">RIPEMD160</a></li>
-            <li><a href="hash256">HASH256</a></li>
-            <li><a href="hash160">HASH160</a></li>
-            <li><a href="sha1">SHA1</a></li>
-          </ul>
-        </li>
-        <li>
-          <strong>Encoding</strong>
-          <ul>
-            <li><a href="ascii">ASCII</a></li>
-            <li><a href="utf8">UTF-8</a></li>
-            <li><a href="bech32">Bech32</a></li>
-            <li><a href="bech32m">Bech32m</a></li>
-          </ul>
-        </li>
-      </ul>
+    <div class="p-3 d-none d-md-block">
+      <SidebarMenu />
     </div>
-    <div class="flex-grow-1 p-5"><slot /></div>
+    <div
+      style:transition="opacity 0.5s"
+      style:opacity={$navigating ? '0.2' : '1'}
+      style:pointer-events={$navigating ? 'none' : 'initial'}
+      style:user-select={$navigating ? 'none' : 'initial'}
+      class="flex-grow-1 p-3 pt-4 p-md-5 pt-md-5"
+    >
+      <slot />
+    </div>
   </div>
 </Container>
+
+<Offcanvas toggle={toggleSidebar} isOpen={sidebarOpen}>
+  <svelte:fragment slot="header">Tools</svelte:fragment>
+  <div class="px-3">
+    <SidebarMenu />
+  </div>
+</Offcanvas>
