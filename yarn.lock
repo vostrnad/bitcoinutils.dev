@@ -440,10 +440,10 @@
     svelte-hmr "^0.15.3"
     vitefu "^0.2.5"
 
-"@sveltestrap/sveltestrap@^6.1.0":
-  version "6.1.0"
-  resolved "https://registry.yarnpkg.com/@sveltestrap/sveltestrap/-/sveltestrap-6.1.0.tgz#1f5c65d2ba20041c458f764f1a0d0a98f1a051bb"
-  integrity sha512-qIoi11ajsAMslMdQb2gpDEfcaOSaG2J7o/Be/NWQenPTr6hyOyqm0Yz3VS4JngDfZje9NaxO5IXkYdNAlB9UYA==
+"@sveltestrap/sveltestrap@^6.1.1":
+  version "6.1.1"
+  resolved "https://registry.yarnpkg.com/@sveltestrap/sveltestrap/-/sveltestrap-6.1.1.tgz#8768742c343b4ad2cc6a2380d95865b64c757518"
+  integrity sha512-jQolgcka8zXYW9GQkhiFfUCytmsBQFtg8uXrxaYkSya/5NtaskyH/LOwcbdeqEEx/lylTdFZZ9/TkdsY9gVKYw==
   dependencies:
     "@popperjs/core" "^2.11.8"
 
