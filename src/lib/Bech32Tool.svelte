@@ -191,7 +191,7 @@
 
 <h2 class="mb-3">{encodingName}</h2>
 
-<FormGroup class="mb-3">
+<FormGroup>
   <Label>Human-readable part</Label>
   <Input
     class="font-monospace w-auto"
@@ -203,7 +203,7 @@
   />
 </FormGroup>
 
-<FormGroup class="mb-3">
+<FormGroup>
   <Label>Version number (optional)</Label>
   <Input
     class="font-monospace w-auto"
@@ -219,7 +219,7 @@
   />
 </FormGroup>
 
-<FormGroup class="mb-3">
+<FormGroup>
   <Label>Hex-encoded data</Label>
   <Input
     class="font-monospace"
@@ -232,7 +232,7 @@
   />
 </FormGroup>
 
-<FormGroup class="mb-3">
+<FormGroup>
   <Label>{encodingName}-encoded data</Label>
   <Input
     class="font-monospace"

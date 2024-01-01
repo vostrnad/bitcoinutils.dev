@@ -29,14 +29,14 @@
 <h2 class="mb-3">{title}</h2>
 <p>{description}</p>
 
-<FormGroup class="mb-3">
+<FormGroup>
   <Input class="w-auto" type="select" bind:value={$type}>
     <option value="utf8">UTF-8</option>
     <option value="hex">Hex</option>
   </Input>
 </FormGroup>
 
-<FormGroup class="mb-3">
+<FormGroup>
   <Input
     class="font-monospace"
     type="textarea"

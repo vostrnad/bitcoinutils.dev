@@ -23,7 +23,7 @@
 <h2 class="mb-3">{name}</h2>
 <p>{description}</p>
 
-<FormGroup class="mb-3">
+<FormGroup>
   <Input
     class="font-monospace"
     type="textarea"
