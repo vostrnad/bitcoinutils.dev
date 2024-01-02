@@ -1,3 +1,5 @@
+import { sum } from './utils/array'
+
 const hexes = Array.from({ length: 256 }, (_, i) =>
   i.toString(16).padStart(2, '0'),
 )
@@ -32,4 +34,51 @@ export const hexToUint8Array = (hex: string): Uint8Array => {
     array[i] = 16 * a + b
   }
   return array
+}
+
+export const uint8ArrayToUIntLE = (array: Uint8Array): number => {
+  return sum(Array.from(array).map((byte, index) => byte * 256 ** index))
+}
+
+export const uint8ArrayToIntLE = (array: Uint8Array): number => {
+  const uint = uint8ArrayToUIntLE(array)
+  const midpoint = 128 * 256 ** (array.length - 1)
+  if (uint < midpoint) {
+    return uint
+  }
+  return midpoint - uint
+}
+
+export class OutOfRangeError extends Error {}
+
+export class Uint8ArrayReader {
+  private readonly array: Uint8Array
+  public position = 0
+
+  constructor(array: Uint8Array) {
+    this.array = array
+  }
+
+  public read(size: number): Uint8Array {
+    const endPosition = this.position + size
+    this.checkIfOutOfRange(endPosition)
+    const res = this.array.subarray(this.position, endPosition)
+    this.position = endPosition
+    return res
+  }
+
+  public readByte(): number {
+    this.checkIfOutOfRange(this.position + 1)
+    return this.array[this.position++]
+  }
+
+  public readUIntLE(size: number): number {
+    return uint8ArrayToUIntLE(this.read(size))
+  }
+
+  private checkIfOutOfRange(endPosition: number) {
+    if (endPosition > this.array.length) {
+      throw new OutOfRangeError()
+    }
+  }
 }

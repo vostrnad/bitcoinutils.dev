@@ -17,3 +17,17 @@
 .sidebar-menu li {
   margin-bottom: 0.25rem;
 }
+
+.example-list {
+  line-height: 1.5;
+}
+
+.example-list a {
+  text-decoration-line: none;
+  text-decoration-style: dashed;
+  text-underline-position: under;
+}
+
+.example-list a:hover {
+  text-decoration-line: underline;
+}

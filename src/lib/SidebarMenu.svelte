@@ -19,5 +19,11 @@
         <li><a href="bech32m">Bech32m</a></li>
       </ul>
     </li>
+    <li>
+      <strong>Bitcoin</strong>
+      <ul>
+        <li><a href="script">Script</a></li>
+      </ul>
+    </li>
   </ul>
 </div>
