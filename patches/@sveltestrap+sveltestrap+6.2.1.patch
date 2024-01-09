@@ -1,5 +1,5 @@
 diff --git a/node_modules/@sveltestrap/sveltestrap/dist/Offcanvas/Offcanvas.d.ts b/node_modules/@sveltestrap/sveltestrap/dist/Offcanvas/Offcanvas.d.ts
-index b094fc6..1c98afd 100644
+index 7ec3af7..afad295 100644
 --- a/node_modules/@sveltestrap/sveltestrap/dist/Offcanvas/Offcanvas.d.ts
 +++ b/node_modules/@sveltestrap/sveltestrap/dist/Offcanvas/Offcanvas.d.ts
 @@ -9,7 +9,7 @@ export interface OffcanvasProps extends HTMLAttributes<HTMLDivElement> {

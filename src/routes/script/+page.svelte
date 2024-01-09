@@ -89,20 +89,6 @@
     }
   }
 
-  // A separate variable for input value is required, otherwise SvelteKit
-  // server goes into an infinite loop, hangs and eventually crashes.
-  $: pushNumFormatInput = pushNumFormat || ''
-
-  const handleNumFormatInput = (
-    e: Event & {
-      currentTarget: EventTarget & HTMLSelectElement
-    },
-  ) => {
-    if (e.currentTarget.value) {
-      pushNumFormat = e.currentTarget.value as 'long' | 'short'
-    }
-  }
-
   $: {
     if (showPushOps === 'none') {
       pushNumFormat = undefined
@@ -195,12 +181,8 @@
         class="w-auto"
         type="select"
         disabled={showPushOps === 'none'}
-        bind:value={pushNumFormatInput}
-        on:input={handleNumFormatInput}
+        bind:value={pushNumFormat}
       >
-        {#if showPushOps === 'none'}
-          <option value="" selected></option>
-        {/if}
         <option value="short">Short (OP_1)</option>
         <option value="long">Long (OP_PUSHNUM_1)</option>
       </Input>
