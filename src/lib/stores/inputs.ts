@@ -19,3 +19,5 @@ export const invalidBech32InputReason = writable<string | undefined>()
 export const decoderInput = writable('')
 
 export const scriptInput = writable('')
+
+export const privateKeyInput = writable('')

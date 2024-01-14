@@ -17,3 +17,14 @@ export const isValidBech32Hrp = (input: string): boolean => {
     return code >= 33 && code <= 126
   })
 }
+
+export const validateInputLength = (
+  input: Uint8Array,
+  length: number,
+): void => {
+  if (input.length !== length) {
+    throw new Error(
+      `Input must be exactly ${length} bytes (not ${input.length})`,
+    )
+  }
+}

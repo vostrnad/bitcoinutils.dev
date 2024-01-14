@@ -49,6 +49,35 @@ export const uint8ArrayToIntLE = (array: Uint8Array): number => {
   return midpoint - uint
 }
 
+const powers256 = Array.from({ length: 32 }, (_, i) => 256n ** BigInt(i))
+
+export const uint8ArrayToBigInt = (input: Uint8Array): bigint => {
+  let res = 0n
+  for (const [index, byte] of input.entries()) {
+    res += BigInt(byte) * powers256[input.length - index - 1]
+  }
+  return res
+}
+
+export const uint8ArrayConcat = (
+  list: Array<Uint8Array | number>,
+): Uint8Array => {
+  const length = sum(
+    list.map((item) => (typeof item === 'number' ? 1 : item.length)),
+  )
+  const res = new Uint8Array(length)
+  let position = 0
+  for (const item of list) {
+    if (typeof item === 'number') {
+      res[position++] = item
+    } else {
+      res.set(item, position)
+      position += item.length
+    }
+  }
+  return res
+}
+
 export class OutOfRangeError extends Error {}
 
 export class Uint8ArrayReader {

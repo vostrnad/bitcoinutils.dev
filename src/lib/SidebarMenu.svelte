@@ -1,7 +1,7 @@
 <div class="sidebar-menu">
   <ul>
     <li>
-      <strong>Cryptography</strong>
+      <strong>Hash</strong>
       <ul>
         <li><a href="sha256">SHA256</a></li>
         <li><a href="ripemd160">RIPEMD160</a></li>
@@ -22,6 +22,7 @@
     <li>
       <strong>Bitcoin</strong>
       <ul>
+        <li><a href="pubkey">Public key</a></li>
         <li><a href="script">Script</a></li>
       </ul>
     </li>
