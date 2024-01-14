@@ -26,5 +26,11 @@
         <li><a href="script">Script</a></li>
       </ul>
     </li>
+    <li>
+      <strong>Other</strong>
+      <ul>
+        <li><a href="custom">Custom</a></li>
+      </ul>
+    </li>
   </ul>
 </div>

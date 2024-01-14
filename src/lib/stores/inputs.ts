@@ -1,4 +1,5 @@
 import { writable } from 'svelte/store'
+import type { CustomFunction } from '$lib/presets'
 
 export const hashInput = writable('')
 
@@ -21,3 +22,10 @@ export const decoderInput = writable('')
 export const scriptInput = writable('')
 
 export const privateKeyInput = writable('')
+
+export const customFunctionItems = writable<
+  Array<{
+    id: number
+    preset: CustomFunction
+  }>
+>([])

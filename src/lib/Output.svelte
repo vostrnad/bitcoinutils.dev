@@ -1,19 +1,25 @@
 <script lang="ts">
-  export let invalidReason: string | undefined
+  import { formatErrorOutput } from './utils/error'
+
+  export let invalidReason: string | undefined = undefined
+  export let disabled: boolean | undefined = undefined
   export let output: string | undefined
 
   $: isValid = !invalidReason
   $: lines = output?.split('\n') || []
 </script>
 
-{#if invalidReason || output}
+{#if invalidReason || output || disabled}
   <p
     class="font-monospace p-3 rounded text-break"
-    class:bg-success-subtle={isValid}
-    class:bg-danger-subtle={!isValid}
+    class:bg-success-subtle={!disabled && isValid}
+    class:bg-danger-subtle={!disabled && !isValid}
+    class:bg-secondary-subtle={disabled}
   >
-    {#if invalidReason}
-      Error: {invalidReason}.
+    {#if disabled}
+      <br />
+    {:else if invalidReason}
+      {formatErrorOutput(invalidReason)}
     {:else}
       {#each lines as line}
         {line}

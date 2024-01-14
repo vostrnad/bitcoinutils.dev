@@ -2954,10 +2954,10 @@ supports-preserve-symlinks-flag@^1.0.0:
   resolved "https://registry.yarnpkg.com/supports-preserve-symlinks-flag/-/supports-preserve-symlinks-flag-1.0.0.tgz#6eda4bd344a3c94aea376d4cc31bc77311039e09"
   integrity sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==
 
-svelte-check@^3.6.2:
-  version "3.6.2"
-  resolved "https://registry.yarnpkg.com/svelte-check/-/svelte-check-3.6.2.tgz#a6922160e17e93c6f5fa2b18ec342cc4c70d60ab"
-  integrity sha512-E6iFh4aUCGJLRz6QZXH3gcN/VFfkzwtruWSRmlKrLWQTiO6VzLsivR6q02WYLGNAGecV3EocqZuCDrC2uttZ0g==
+svelte-check@^3.6.3:
+  version "3.6.3"
+  resolved "https://registry.yarnpkg.com/svelte-check/-/svelte-check-3.6.3.tgz#416c9a83deb7c2030046824ebee10ab93bbcd394"
+  integrity sha512-Q2nGnoysxUnB9KjnjpQLZwdjK62DHyW6nuH/gm2qteFnDk0lCehe/6z8TsIvYeKjC6luKaWxiNGyOcWiLLPSwA==
   dependencies:
     "@jridgewell/trace-mapping" "^0.3.17"
     chokidar "^3.4.1"
@@ -2967,6 +2967,11 @@ svelte-check@^3.6.2:
     sade "^1.7.4"
     svelte-preprocess "^5.1.0"
     typescript "^5.0.3"
+
+svelte-dnd-action@^0.9.38:
+  version "0.9.38"
+  resolved "https://registry.yarnpkg.com/svelte-dnd-action/-/svelte-dnd-action-0.9.38.tgz#ec0945588bece5f457415fea779c4b1cf0f877de"
+  integrity sha512-L80YR+aknn54LmjPKFELYGDkZhed5ReBzH2xe61zFNGfQyoeXbFB1hs69QWgBIYufZPWUhAiVXIMhP7UQWs1dw==
 
 "svelte-eslint-parser@>=0.33.0 <1.0.0":
   version "0.33.1"
