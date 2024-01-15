@@ -55,6 +55,10 @@
   secp256k1).
 </p>
 
+<svelte:head>
+  <title>Public key - bitcoinutils.dev</title>
+</svelte:head>
+
 <Alert color="warning">
   Your private keys are not sent to the server. However, you should never paste
   sensitive private keys into any website.

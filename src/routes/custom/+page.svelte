@@ -132,6 +132,10 @@
 <h2 class="mb-3">Custom</h2>
 <p>You can define your own sequence of functions.</p>
 
+<svelte:head>
+  <title>Custom - bitcoinutils.dev</title>
+</svelte:head>
+
 <FormGroup>
   <Input
     class="w-auto"
