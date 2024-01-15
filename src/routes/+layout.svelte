@@ -40,9 +40,15 @@
   </div>
 </Container>
 
-<Offcanvas toggle={toggleSidebar} isOpen={sidebarOpen}>
+<Offcanvas toggle={toggleSidebar} isOpen={sidebarOpen} scroll>
   <svelte:fragment slot="header">Tools</svelte:fragment>
   <div class="px-3">
     <SidebarMenu />
   </div>
 </Offcanvas>
+
+<style>
+  :global(body) {
+    overflow-y: scroll;
+  }
+</style>
