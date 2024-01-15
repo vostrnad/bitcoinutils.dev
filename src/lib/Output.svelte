@@ -3,13 +3,14 @@
 
   export let invalidReason: string | undefined = undefined
   export let disabled: boolean | undefined = undefined
+  export let showEmpty = false
   export let output: string | undefined
 
   $: isValid = !invalidReason
   $: lines = output?.split('\n') || []
 </script>
 
-{#if invalidReason || output || disabled}
+{#if invalidReason || output || disabled || showEmpty}
   <p
     class="font-monospace p-3 rounded text-break"
     class:bg-success-subtle={!disabled && isValid}

@@ -8,6 +8,11 @@ import {
   getP2WPKHAddress,
   getP2WSHAddress,
 } from './bitcoin'
+import {
+  uint8ArrayReverse,
+  uint8ArrayToBigIntBE,
+  uint8ArrayToBigIntLE,
+} from './uintarray'
 import { createPublicKey } from '$lib/secp256k1'
 
 export interface CustomFunction {
@@ -41,6 +46,21 @@ export const presets: CustomFunction[] = [
     name: 'SHA1',
     textInput: true,
     fn: sha1,
+  },
+  {
+    name: 'Reverse',
+    textInput: false,
+    fn: uint8ArrayReverse,
+  },
+  {
+    name: 'Hex to decimal (LE)',
+    textInput: false,
+    fn: (arg) => uint8ArrayToBigIntLE(arg).toString(),
+  },
+  {
+    name: 'Hex to decimal (BE)',
+    textInput: false,
+    fn: (arg) => uint8ArrayToBigIntBE(arg).toString(),
   },
   {
     name: 'Public key (uncompressed)',

@@ -222,6 +222,7 @@
             : undefined}
           output={outputs[i]}
           disabled={Boolean(invalidReason) && i > invalidReasonPosition}
+          showEmpty
         />
       </FormGroup>
     </div>

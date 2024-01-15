@@ -49,12 +49,22 @@ export const uint8ArrayToIntLE = (array: Uint8Array): number => {
   return midpoint - uint
 }
 
-const powers256 = Array.from({ length: 32 }, (_, i) => 256n ** BigInt(i))
-
-export const uint8ArrayToBigInt = (input: Uint8Array): bigint => {
+export const uint8ArrayToBigIntLE = (input: Uint8Array): bigint => {
   let res = 0n
-  for (const [index, byte] of input.entries()) {
-    res += BigInt(byte) * powers256[input.length - index - 1]
+  let p = 1n
+  for (const byte of input) {
+    res += BigInt(byte) * p
+    p *= 256n
+  }
+  return res
+}
+
+export const uint8ArrayToBigIntBE = (input: Uint8Array): bigint => {
+  let res = 0n
+  let p = 1n
+  for (let i = input.length - 1; i >= 0; i--) {
+    res += BigInt(input[i]) * p
+    p *= 256n
   }
   return res
 }
@@ -74,6 +84,14 @@ export const uint8ArrayConcat = (
       res.set(item, position)
       position += item.length
     }
+  }
+  return res
+}
+
+export const uint8ArrayReverse = (array: Uint8Array): Uint8Array => {
+  const res = new Uint8Array(array.length)
+  for (let i = 0; i < array.length; i++) {
+    res[i] = array[array.length - 1 - i]
   }
   return res
 }
