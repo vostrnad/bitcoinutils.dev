@@ -185,7 +185,12 @@
           outputElement.classList.add('bg-secondary-subtle')
         }
       } else {
-        outputElement.textContent = outputs[index]
+        const output = outputs[index]
+        if (output) {
+          outputElement.textContent = output
+        } else {
+          outputElement.innerHTML = '<br>'
+        }
         outputElement.classList.add('bg-success-subtle')
       }
     },
