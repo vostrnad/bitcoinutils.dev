@@ -9,6 +9,7 @@
     Input,
   } from '@sveltestrap/sveltestrap'
   import { SOURCES, TRIGGERS, dndzone } from 'svelte-dnd-action'
+  import AutoWidthSelect from '$lib/AutoWidthSelect.svelte'
   import Output from '$lib/Output.svelte'
   import { type CustomFunction, presets } from '$lib/presets'
   import {
@@ -62,8 +63,11 @@
   }
 
   const startDrag = (e: Event) => {
-    e.preventDefault()
-    dragDisabled = false
+    const targetTagName = (e.target as HTMLElement).tagName
+    if (targetTagName !== 'SELECT' && targetTagName !== 'BUTTON') {
+      e.preventDefault()
+      dragDisabled = false
+    }
   }
 
   const cancelDrag = (e: Event) => {
@@ -89,6 +93,19 @@
 
   const removeFunction = (index: number) => {
     $items = $items.slice(0, index).concat($items.slice(index + 1))
+  }
+
+  const handleChangeFunction = (
+    e: CustomEvent<{ value: string }>,
+    index: number,
+  ) => {
+    const name = e.detail.value
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const preset = presets.find((item) => item.name === name)!
+    $items = $items
+      .slice(0, index)
+      .concat([{ id: $items[index].id, preset }])
+      .concat($items.slice(index + 1))
   }
 
   $: (() => {
@@ -218,7 +235,16 @@
             class="text-center"
             toggle={() => removeFunction(i)}
           >
-            <span>{i + 1}</span>. {item.preset.name}
+            <span>{i + 1}</span>.
+            <AutoWidthSelect
+              class="custom-item-preset-select"
+              value={item.preset.name}
+              on:change={(e) => handleChangeFunction(e, i)}
+            >
+              {#each presets as preset}
+                <option>{preset.name}</option>
+              {/each}
+            </AutoWidthSelect>
           </Alert>
         </div>
         <Output
@@ -244,3 +270,19 @@
     {/each}
   </DropdownMenu>
 </Dropdown>
+
+<style>
+  :global(.custom-item-preset-select) {
+    background: transparent;
+    color: inherit;
+    border: none;
+    padding: 0;
+
+    outline: none;
+    box-shadow: none;
+
+    & option {
+      color: var(--bs-body-color);
+    }
+  }
+</style>
