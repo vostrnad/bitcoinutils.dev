@@ -11,15 +11,15 @@
   import { SOURCES, TRIGGERS, dndzone } from 'svelte-dnd-action'
   import AutoWidthSelect from '$lib/AutoWidthSelect.svelte'
   import Output from '$lib/Output.svelte'
-  import { type CustomFunction, presets } from '$lib/presets'
   import {
     hashInput as input,
     customFunctionItems as items,
     hashInputType as type,
   } from '$lib/stores/inputs'
-  import { hexToUint8Array, uint8ArrayToHex } from '$lib/uintarray'
   import { formatErrorOutput, getErrorMessage } from '$lib/utils/error'
-  import { isValidHex } from '$lib/validation'
+  import { type CustomFunction, presets } from '$lib/utils/presets'
+  import { hexToUint8Array, uint8ArrayToHex } from '$lib/utils/uintarray'
+  import { isValidHex } from '$lib/utils/validation'
 
   interface Item {
     id: number

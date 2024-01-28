@@ -2,7 +2,6 @@
   import { bech32, bech32m } from '@scure/base'
   import { FormGroup, Input, Label } from '@sveltestrap/sveltestrap'
   import Output from '$lib/Output.svelte'
-  import { bech32TextToWords, bech32WordsToText } from '$lib/bech32'
   import {
     bech32Input,
     hexInput,
@@ -11,12 +10,13 @@
     invalidBech32InputType as invalidInputType,
     versionNumberInput as versionNumber,
   } from '$lib/stores/inputs'
-  import { hexToUint8Array, uint8ArrayToHex } from '$lib/uintarray'
+  import { bech32TextToWords, bech32WordsToText } from '$lib/utils/bech32'
+  import { hexToUint8Array, uint8ArrayToHex } from '$lib/utils/uintarray'
   import {
     isValidBech32Data,
     isValidBech32Hrp,
     isValidHex,
-  } from '$lib/validation'
+  } from '$lib/utils/validation'
 
   export let encoding: 'bech32' | 'bech32m'
 

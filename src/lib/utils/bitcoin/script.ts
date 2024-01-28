@@ -4,7 +4,7 @@ import {
   uint8ArrayToHex,
   uint8ArrayToIntLE,
   uint8ArrayToUIntLE,
-} from './uintarray'
+} from '$lib/utils/uintarray'
 
 export const range = (min: number, max: number): number[] => {
   const res: number[] = []

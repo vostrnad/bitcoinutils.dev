@@ -2,8 +2,8 @@
   import { FormGroup, Input } from '@sveltestrap/sveltestrap'
   import { decoderInput as input } from './stores/inputs'
   import Output from '$lib/Output.svelte'
-  import { hexToUint8Array } from '$lib/uintarray'
-  import { isValidHex } from '$lib/validation'
+  import { hexToUint8Array } from '$lib/utils/uintarray'
+  import { isValidHex } from '$lib/utils/validation'
 
   export let encoding: string
   export let name: string

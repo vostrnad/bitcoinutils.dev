@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store'
-import type { CustomFunction } from '$lib/presets'
+import type { CustomFunction } from '$lib/utils/presets'
 
 export const hashInput = writable('')
 

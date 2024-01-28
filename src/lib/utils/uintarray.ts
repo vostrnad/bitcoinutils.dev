@@ -1,4 +1,4 @@
-import { sum } from './utils/array'
+import { sum } from './array'
 
 const hexes = Array.from({ length: 256 }, (_, i) =>
   i.toString(16).padStart(2, '0'),

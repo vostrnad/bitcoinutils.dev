@@ -7,13 +7,13 @@ import {
   getP2TRAddress,
   getP2WPKHAddress,
   getP2WSHAddress,
-} from './bitcoin'
+} from './bitcoin/address'
+import { createPublicKey } from './secp256k1'
 import {
   uint8ArrayReverse,
   uint8ArrayToBigIntBE,
   uint8ArrayToBigIntLE,
 } from './uintarray'
-import { createPublicKey } from '$lib/secp256k1'
 
 export interface CustomFunction {
   name: string

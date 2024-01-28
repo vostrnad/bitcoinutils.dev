@@ -2,8 +2,8 @@
   import { FormGroup, Input } from '@sveltestrap/sveltestrap'
   import { hashInput as input, hashInputType as type } from './stores/inputs'
   import Output from '$lib/Output.svelte'
-  import { hexToUint8Array, uint8ArrayToHex } from '$lib/uintarray'
-  import { isValidHex } from '$lib/validation'
+  import { hexToUint8Array, uint8ArrayToHex } from '$lib/utils/uintarray'
+  import { isValidHex } from '$lib/utils/validation'
 
   export let hash: (input: string | Uint8Array) => Uint8Array
   export let title: string

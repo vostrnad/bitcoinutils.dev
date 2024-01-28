@@ -1,15 +1,15 @@
 <script lang="ts">
   import { Alert, FormGroup, Input, Label } from '@sveltestrap/sveltestrap'
   import Output from '$lib/Output.svelte'
-  import { createPublicKey } from '$lib/secp256k1'
   import { privateKeyInput as input } from '$lib/stores/inputs'
+  import { getErrorMessage } from '$lib/utils/error'
+  import { createPublicKey } from '$lib/utils/secp256k1'
   import {
     hexToUint8Array,
     uint8ArrayConcat,
     uint8ArrayToHex,
-  } from '$lib/uintarray'
-  import { getErrorMessage } from '$lib/utils/error'
-  import { isValidHex } from '$lib/validation'
+  } from '$lib/utils/uintarray'
+  import { isValidHex } from '$lib/utils/validation'
 
   let publicKeyUncompressed: Uint8Array | undefined
   let publicKeyCompressed: Uint8Array | undefined

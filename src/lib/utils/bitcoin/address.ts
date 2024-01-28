@@ -1,7 +1,7 @@
 import { sha256 } from '@noble/hashes/sha256'
 import { base58check, bech32, bech32m } from '@scure/base'
-import { uint8ArrayConcat } from './uintarray'
-import { validateInputLength } from './validation'
+import { uint8ArrayConcat } from '$lib/utils/uintarray'
+import { validateInputLength } from '$lib/utils/validation'
 
 export const getP2PKHAddress = (publicKeyHash: Uint8Array): string => {
   validateInputLength(publicKeyHash, 20)

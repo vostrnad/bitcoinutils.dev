@@ -3,10 +3,10 @@
   import HelpTooltip from '$lib/HelpTooltip.svelte'
   import LabeledInputRow from '$lib/LabeledInputRow.svelte'
   import Output from '$lib/Output.svelte'
-  import { decodeScript } from '$lib/script'
   import { scriptInput as input } from '$lib/stores/inputs'
-  import { hexToUint8Array } from '$lib/uintarray'
-  import { isValidHex } from '$lib/validation'
+  import { decodeScript } from '$lib/utils/bitcoin/script'
+  import { hexToUint8Array } from '$lib/utils/uintarray'
+  import { isValidHex } from '$lib/utils/validation'
 
   const examples: Array<[string, string]> = [
     [
