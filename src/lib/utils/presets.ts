@@ -8,6 +8,7 @@ import {
   getP2WPKHAddress,
   getP2WSHAddress,
 } from './bitcoin/address'
+import { sha256d } from './hash'
 import { createPublicKey } from './secp256k1'
 import {
   uint8ArrayReverse,
@@ -35,7 +36,7 @@ export const presets: CustomFunction[] = [
   {
     name: 'HASH256',
     textInput: true,
-    fn: (arg) => sha256(sha256(arg)),
+    fn: sha256d,
   },
   {
     name: 'HASH160',
