@@ -7,7 +7,6 @@
   export let output: string | undefined
 
   $: isValid = !invalidReason
-  $: lines = output?.split('\n') || []
 </script>
 
 {#if invalidReason || output || disabled || showEmpty}
@@ -16,16 +15,16 @@
     class:bg-success-subtle={!disabled && isValid}
     class:bg-danger-subtle={!disabled && !isValid}
     class:bg-secondary-subtle={disabled}
+    style:white-space="pre-wrap"
   >
     {#if disabled}
       <br />
     {:else if invalidReason}
       {formatErrorOutput(invalidReason)}
+    {:else if output === ''}
+      <br />
     {:else}
-      {#each lines as line}
-        {line}
-        <br />
-      {/each}
+      {output}
     {/if}
   </p>
 {/if}
