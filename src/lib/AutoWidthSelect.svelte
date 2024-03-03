@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher, onMount } from 'svelte'
+  import { browser } from '$app/environment'
 
   let className = ''
   export { className as class }
@@ -24,8 +25,17 @@
   $: dispatch('change', { value })
 </script>
 
-<select class={className} style:width={`${width + 2}px`} bind:value>
-  <slot />
+<select
+  class={className}
+  style:width={browser ? `${width + 2}px` : ''}
+  style:padding-inline-end="2px"
+  bind:value
+>
+  {#if browser}
+    <slot />
+  {:else}
+    <option>{value}</option>
+  {/if}
 </select>
 <select
   bind:this={dummy}

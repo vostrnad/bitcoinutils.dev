@@ -1,5 +1,9 @@
 import { bech32Alphabet } from './bech32'
 
+export const isNotUndefined = <T>(value: T | null | undefined): value is T => {
+  return typeof value !== 'undefined' && value !== null
+}
+
 export const isValidHex = (hex: string): boolean => {
   return hex.length % 2 === 0 && /^[\da-f]*$/i.test(hex)
 }

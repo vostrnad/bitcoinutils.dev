@@ -15,6 +15,7 @@ import {
   uint8ArrayToBigIntBE,
   uint8ArrayToBigIntLE,
 } from './uintarray'
+import { isNotUndefined } from './validation'
 
 export interface CustomFunction {
   name: string
@@ -104,3 +105,21 @@ export const presets: CustomFunction[] = [
     fn: getP2TRAddress,
   },
 ]
+
+export const presetToId = (preset: CustomFunction): string =>
+  preset.name
+    .toLowerCase()
+    .replaceAll(/(^\W+|\W+$)/g, '')
+    .replaceAll(/\W+/g, '_')
+
+export const getPresetById = (id: string): CustomFunction | undefined =>
+  presets.find((preset) => presetToId(preset) === id)
+
+export const serializeCustomSequence = (functions: CustomFunction[]): string =>
+  functions.map(presetToId).join(',')
+
+export const parseCustomSequence = (ids: string): CustomFunction[] =>
+  ids
+    .split(',')
+    .map((id) => getPresetById(id.trim()))
+    .filter(isNotUndefined)

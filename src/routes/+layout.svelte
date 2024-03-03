@@ -7,13 +7,27 @@
     NavbarToggler,
     Offcanvas,
   } from '@sveltestrap/sveltestrap'
+  import { setContext } from 'svelte'
+  import { writable } from 'svelte/store'
   import { navigating } from '$app/stores'
   import SidebarMenu from '$lib/SidebarMenu.svelte'
+  import type { CustomFunction } from '$lib/utils/presets'
 
   let sidebarOpen = false
   const toggleSidebar = () => (sidebarOpen = !sidebarOpen)
 
   $: if ($navigating) sidebarOpen = false
+
+  setContext('hashInputType', writable<'utf8' | 'hex'>('utf8'))
+  setContext(
+    'customFunctionItems',
+    writable<
+      Array<{
+        id: number
+        preset: CustomFunction
+      }>
+    >([]),
+  )
 </script>
 
 <Navbar container={false} expand="md" color="light" class="shadow-sm">

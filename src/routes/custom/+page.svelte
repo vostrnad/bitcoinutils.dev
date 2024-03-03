@@ -9,19 +9,60 @@
     FormGroup,
     Input,
   } from '@sveltestrap/sveltestrap'
+  import { getContext } from 'svelte'
+  import type { Writable } from 'svelte/store'
   import { SOURCES, TRIGGERS, dndzone } from 'svelte-dnd-action'
+  import { browser } from '$app/environment'
+  import { goto } from '$app/navigation'
+  import { navigating, page } from '$app/stores'
   import AutoWidthSelect from '$lib/AutoWidthSelect.svelte'
   import InputLength from '$lib/InputLength.svelte'
   import Output from '$lib/Output.svelte'
-  import {
-    hashInput as input,
-    customFunctionItems as items,
-    hashInputType as type,
-  } from '$lib/stores/inputs'
+  import { hashInput as input } from '$lib/stores/inputs'
   import { formatErrorOutput, getErrorMessage } from '$lib/utils/error'
-  import { type CustomFunction, presets } from '$lib/utils/presets'
+  import {
+    type CustomFunction,
+    parseCustomSequence,
+    presets,
+    serializeCustomSequence,
+  } from '$lib/utils/presets'
   import { hexToUint8Array, uint8ArrayToHex } from '$lib/utils/uintarray'
   import { isValidHex } from '$lib/utils/validation'
+
+  const type: Writable<'utf8' | 'hex'> = getContext('hashInputType')
+  const items: Writable<
+    Array<{
+      id: number
+      preset: CustomFunction
+    }>
+  > = getContext('customFunctionItems')
+
+  // load items from parameter on initial load
+  const initialParam = $page.url.searchParams.get('s')
+  if (initialParam) {
+    $items = parseCustomSequence(initialParam).map((preset) => ({
+      id: Math.random(),
+      preset,
+    }))
+  }
+
+  // update URL parameter when items change
+  $: if (browser) {
+    const serialized = serializeCustomSequence(
+      $items.map((item) => item.preset),
+    )
+    void goto(serialized ? `?s=${serialized}` : '?')
+  }
+
+  // if clicked on menu item, restore URL parameter
+  $: if ($navigating && !$page.url.searchParams.has('s')) {
+    const serialized = serializeCustomSequence(
+      $items.map((item) => item.preset),
+    )
+    if (serialized) {
+      void goto(`?s=${serialized}`)
+    }
+  }
 
   interface Item {
     id: number
