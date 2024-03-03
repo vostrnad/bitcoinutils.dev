@@ -1,6 +1,7 @@
 <script lang="ts">
   import {
     Alert,
+    Button,
     Dropdown,
     DropdownItem,
     DropdownMenu,
@@ -279,6 +280,9 @@
       </DropdownItem>
     {/each}
   </DropdownMenu>
+  {#if $items.length > 0}
+    <Button color="dark" outline on:click={() => ($items = [])}>Clear</Button>
+  {/if}
 </Dropdown>
 
 <style>
