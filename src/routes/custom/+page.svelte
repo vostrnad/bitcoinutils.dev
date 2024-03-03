@@ -10,6 +10,7 @@
   } from '@sveltestrap/sveltestrap'
   import { SOURCES, TRIGGERS, dndzone } from 'svelte-dnd-action'
   import AutoWidthSelect from '$lib/AutoWidthSelect.svelte'
+  import InputLength from '$lib/InputLength.svelte'
   import Output from '$lib/Output.svelte'
   import {
     hashInput as input,
@@ -85,6 +86,7 @@
 
   let invalidReason: string | undefined
   let invalidReasonPosition = 0
+  let malformedHexInput = false
   let outputs: string[] = []
 
   const addFunction = (preset: CustomFunction) => {
@@ -110,6 +112,7 @@
 
   $: (() => {
     invalidReason = undefined
+    malformedHexInput = false
     outputs = []
 
     if ($items.at(0)?.preset.textInput === false) $type = 'hex'
@@ -118,6 +121,7 @@
       $input = $input.trim()
 
       if (!isValidHex($input)) {
+        malformedHexInput = true
         invalidReason = 'Input is not valid hex'
         invalidReasonPosition = 0
         return
@@ -173,6 +177,12 @@
     rows={3}
     invalid={Boolean(invalidReason) && invalidReasonPosition === 0}
     bind:value={$input}
+  />
+  <InputLength
+    input={$input}
+    type={$type}
+    isValid={!malformedHexInput}
+    on:clear={() => ($input = '')}
   />
 </FormGroup>
 

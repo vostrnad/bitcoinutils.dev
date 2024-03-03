@@ -1,6 +1,7 @@
 <script lang="ts">
   import { FormGroup, Input } from '@sveltestrap/sveltestrap'
   import HelpTooltip from '$lib/HelpTooltip.svelte'
+  import InputLength from '$lib/InputLength.svelte'
   import LabeledInputRow from '$lib/LabeledInputRow.svelte'
   import Output from '$lib/Output.svelte'
   import { scriptInput as input } from '$lib/stores/inputs'
@@ -134,6 +135,12 @@
     rows={3}
     invalid={!isValid}
     bind:value={$input}
+  />
+  <InputLength
+    input={$input}
+    type="hex"
+    {isValid}
+    on:clear={() => ($input = '')}
   />
 </FormGroup>
 
