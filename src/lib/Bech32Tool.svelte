@@ -1,6 +1,7 @@
 <script lang="ts">
   import { bech32, bech32m } from '@scure/base'
   import { FormGroup, Input, Label } from '@sveltestrap/sveltestrap'
+  import IntegerInput from '$lib/IntegerInput.svelte'
   import Output from '$lib/Output.svelte'
   import {
     bech32Input,
@@ -42,15 +43,6 @@
   let invalidVersionReason: string | undefined
 
   $: {
-    if (typeof $versionNumber === 'number') {
-      if ($versionNumber > 31) $versionNumber = 31
-      if ($versionNumber < 0) $versionNumber = 0
-      if (!Number.isInteger($versionNumber)) {
-        $versionNumber = Math.floor($versionNumber)
-      }
-      if (Number.isNaN($versionNumber)) $versionNumber = null
-    }
-
     invalidVersionReason = undefined
     if (typeof $versionNumber === 'number') {
       if (segwitPrefixes.includes($hrp.toLowerCase())) {
@@ -110,31 +102,6 @@
       }
       output = encoder.encode($hrp, words, false)
     }
-  }
-
-  const handleVersionKeyDown = (
-    e: KeyboardEvent & {
-      currentTarget: EventTarget & HTMLInputElement
-    },
-  ) => {
-    const key = e.key.toLowerCase()
-    if (
-      !/^\d$/.test(key) &&
-      key !== 'backspace' &&
-      !key.startsWith('arrow') &&
-      !e.ctrlKey
-    ) {
-      e.preventDefault()
-      e.stopPropagation()
-    }
-  }
-
-  const handleVersionInput = (
-    e: Event & {
-      currentTarget: EventTarget & HTMLInputElement
-    },
-  ) => {
-    e.currentTarget.value = e.currentTarget.value.replace(/^0+(.)/, '$1')
   }
 
   const handleHexInput = (
@@ -205,17 +172,12 @@
 
 <FormGroup>
   <Label>Version number (optional)</Label>
-  <Input
+  <IntegerInput
     class="font-monospace w-auto"
-    type="number"
     min={0}
     max={31}
-    step={1}
-    invalid={invalidVersionReason !== undefined}
-    feedback={invalidVersionReason}
+    invalidReason={invalidVersionReason}
     bind:value={$versionNumber}
-    on:input={handleVersionInput}
-    on:keydown={handleVersionKeyDown}
   />
 </FormGroup>
 
