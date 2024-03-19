@@ -39,7 +39,7 @@
 
 <Container md>
   <div class="d-flex">
-    <div class="p-3 d-none d-md-block">
+    <div class="flex-shrink-0 p-3 d-none d-md-block">
       <SidebarMenu />
     </div>
     <div
