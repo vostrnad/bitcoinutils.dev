@@ -161,7 +161,7 @@
   </LabeledInputRow>
 </FormGroup>
 
-<FormGroup class="p-3 border rounded">
+<FormGroup class="p-3 border rounded lastchild-mb-0">
   <FormGroup>
     <Input type="checkbox" label="Newlines" bind:checked={newlines} />
   </FormGroup>
@@ -205,7 +205,7 @@
     />
   </FormGroup>
 
-  <FormGroup spacing="mb-0" class="d-flex align-items-center">
+  <FormGroup class="d-flex align-items-center">
     <Input
       type="checkbox"
       label="Decimal numbers"

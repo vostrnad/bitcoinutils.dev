@@ -31,3 +31,7 @@
 .example-list a:hover {
   text-decoration-line: underline;
 }
+
+.lastchild-mb-0 > :last-child {
+  margin-bottom: 0 !important;
+}
