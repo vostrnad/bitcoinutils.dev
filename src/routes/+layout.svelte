@@ -30,7 +30,7 @@
   )
 </script>
 
-<Navbar container={false} expand="md" color="light" class="shadow-sm">
+<Navbar container={false} expand="md" color="body-tertiary" class="shadow-sm">
   <Container md class="justify-content-start">
     <NavbarToggler class="me-3" on:click={toggleSidebar} />
     <NavbarBrand href="/">bitcoinutils.dev</NavbarBrand>
@@ -64,5 +64,10 @@
 <style>
   :global(body) {
     overflow-y: scroll;
+  }
+
+  :global([data-bs-theme='dark']) {
+    --bs-primary-bg-subtle: #0c2448;
+    --bs-success-bg-subtle: #094228;
   }
 </style>

@@ -322,7 +322,9 @@
     {/each}
   </DropdownMenu>
   {#if $items.length > 0}
-    <Button color="dark" outline on:click={() => ($items = [])}>Clear</Button>
+    <Button color="secondary" outline on:click={() => ($items = [])}
+      >Clear</Button
+    >
   {/if}
 </Dropdown>
 
@@ -338,6 +340,7 @@
 
     & option {
       color: var(--bs-body-color);
+      background: var(--bs-body-bg);
     }
   }
 </style>
