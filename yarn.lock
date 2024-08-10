@@ -2968,10 +2968,10 @@ svelte-check@^3.6.3:
     svelte-preprocess "^5.1.0"
     typescript "^5.0.3"
 
-svelte-dnd-action@^0.9.38:
-  version "0.9.38"
-  resolved "https://registry.yarnpkg.com/svelte-dnd-action/-/svelte-dnd-action-0.9.38.tgz#ec0945588bece5f457415fea779c4b1cf0f877de"
-  integrity sha512-L80YR+aknn54LmjPKFELYGDkZhed5ReBzH2xe61zFNGfQyoeXbFB1hs69QWgBIYufZPWUhAiVXIMhP7UQWs1dw==
+svelte-dnd-action@^0.9.49:
+  version "0.9.49"
+  resolved "https://registry.yarnpkg.com/svelte-dnd-action/-/svelte-dnd-action-0.9.49.tgz#928a3ca305cb0fad95918b964062068f63183c42"
+  integrity sha512-kAIDTSMoTZcJCqUpT8COLAkF0/NRBoJ/pIbPUra9UVRnyJljLy6dLgRuL2OojSqyNs3nToBvn5XOGaFMREwjfQ==
 
 "svelte-eslint-parser@>=0.33.0 <1.0.0":
   version "0.33.1"

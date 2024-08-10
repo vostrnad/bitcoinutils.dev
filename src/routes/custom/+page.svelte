@@ -10,6 +10,7 @@
     Input,
   } from '@sveltestrap/sveltestrap'
   import { getContext } from 'svelte'
+  import { flip } from 'svelte/animate'
   import type { Writable } from 'svelte/store'
   import { SOURCES, TRIGGERS, dndzone } from 'svelte-dnd-action'
   import { browser } from '$app/environment'
@@ -268,7 +269,7 @@
   on:finalize={handleFinalize}
 >
   {#each $items as item, i (item.id)}
-    <div>
+    <div animate:flip={{ duration: 200 }}>
       <FormGroup>
         <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
         <!-- svelte-ignore a11y-no-static-element-interactions -->
