@@ -96,6 +96,38 @@ export const uint8ArrayReverse = (array: Uint8Array): Uint8Array => {
   return res
 }
 
+export const uint8ArrayEqual = (
+  arr1: Uint8Array,
+  arr2: Uint8Array,
+): boolean => {
+  if (arr1.length !== arr2.length) {
+    return false
+  }
+
+  return arr1.every((value, index) => value === arr2[index])
+}
+
+const getSubarrayFromFirstNonzero = (array: Uint8Array) => {
+  if (array[0] === 0) {
+    const firstNonzeroIndex = array.findIndex((n) => n !== 0)
+    if (firstNonzeroIndex === -1) {
+      array = new Uint8Array()
+    } else {
+      array = array.subarray(firstNonzeroIndex)
+    }
+  }
+  return array
+}
+
+export const uint8ArrayUIntBEEqual = (
+  arr1: Uint8Array,
+  arr2: Uint8Array,
+): boolean => {
+  arr1 = getSubarrayFromFirstNonzero(arr1)
+  arr2 = getSubarrayFromFirstNonzero(arr2)
+  return uint8ArrayEqual(arr1, arr2)
+}
+
 export class OutOfRangeError extends Error {}
 
 export class Uint8ArrayReader {

@@ -19,3 +19,5 @@ export const decoderInput = writable('')
 export const scriptInput = writable('')
 
 export const privateKeyInput = writable('')
+
+export const derSignatureInput = writable('300602010002010001')

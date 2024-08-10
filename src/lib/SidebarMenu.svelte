@@ -23,6 +23,7 @@
       <strong>Bitcoin</strong>
       <ul>
         <li><a href="pubkey">Public key</a></li>
+        <li><a href="der">DER signature</a></li>
         <li><a href="script">Script</a></li>
       </ul>
     </li>

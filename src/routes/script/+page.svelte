@@ -136,12 +136,7 @@
     invalid={!isValid}
     bind:value={$input}
   />
-  <InputLength
-    input={$input}
-    type="hex"
-    {isValid}
-    on:clear={() => ($input = '')}
-  />
+  <InputLength bind:input={$input} type="hex" {isValid} />
 </FormGroup>
 
 <FormGroup>

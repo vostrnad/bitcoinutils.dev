@@ -221,12 +221,7 @@
     invalid={Boolean(invalidReason) && invalidReasonPosition === 0}
     bind:value={$input}
   />
-  <InputLength
-    input={$input}
-    type={$type}
-    isValid={!malformedHexInput}
-    on:clear={() => ($input = '')}
-  />
+  <InputLength bind:input={$input} type={$type} isValid={!malformedHexInput} />
 </FormGroup>
 
 <div

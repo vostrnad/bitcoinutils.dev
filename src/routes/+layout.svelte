@@ -69,5 +69,7 @@
   :global([data-bs-theme='dark']) {
     --bs-primary-bg-subtle: #0c2448;
     --bs-success-bg-subtle: #094228;
+    --bs-secondary-bg-subtle: #40434a;
+    --bs-danger-bg-subtle: #6c1c23;
   }
 </style>
