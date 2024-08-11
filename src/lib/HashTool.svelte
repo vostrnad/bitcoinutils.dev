@@ -4,7 +4,7 @@
   import type { Writable } from 'svelte/store'
   import { hashInput as input } from './stores/inputs'
   import Output from '$lib/Output.svelte'
-  import { hexToUint8Array, uint8ArrayToHex } from '$lib/utils/uintarray'
+  import { bytesToHex, hexToBytes } from '$lib/utils/uintarray'
   import { isValidHex } from '$lib/utils/validation'
 
   const type = getContext<Writable<'utf8' | 'hex'>>('hashInputType')
@@ -21,10 +21,10 @@
     if (isValid) {
       switch ($type) {
         case 'hex':
-          output = uint8ArrayToHex(hash(hexToUint8Array($input)))
+          output = bytesToHex(hash(hexToBytes($input)))
           break
         default:
-          output = uint8ArrayToHex(hash($input))
+          output = bytesToHex(hash($input))
       }
     }
   }

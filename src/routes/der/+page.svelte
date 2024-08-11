@@ -13,8 +13,8 @@
     tryDecodeDERSignature,
   } from '$lib/utils/bitcoin/signature'
   import {
-    hexToUint8Array,
-    uint8ArrayToHex,
+    bytesToHex,
+    hexToBytes,
     uint8ArrayUIntBEEqual,
   } from '$lib/utils/uintarray'
   import { isValidHex } from '$lib/utils/validation'
@@ -37,15 +37,15 @@
     $input = $input.trim()
     isValidAsHex = isValidHex($input)
     if (isValidAsHex) {
-      decodeRes = tryDecodeDERSignature(hexToUint8Array($input))
+      decodeRes = tryDecodeDERSignature(hexToBytes($input))
       if (decodeRes.error) {
         invalidReason = decodeRes.error.text
       }
       rString = decodeRes.r
-        ? uint8ArrayToHex(decodeRes.r.value).replace(/^00/, '')
+        ? bytesToHex(decodeRes.r.value).replace(/^00/, '')
         : ''
       sString = decodeRes.s
-        ? uint8ArrayToHex(decodeRes.s.value).replace(/^00/, '')
+        ? bytesToHex(decodeRes.s.value).replace(/^00/, '')
         : ''
       sighashString = decodeRes.sighash
         ? getSighashFlagName(decodeRes.sighash.value) || ''
@@ -164,7 +164,7 @@
         decodeRes.sighash &&
         !uint8ArrayUIntBEEqual(r, decodeRes.r.value)
       ) {
-        $input = uint8ArrayToHex(
+        $input = bytesToHex(
           serializeDERSignature(r, decodeRes.s.value, decodeRes.sighash.value),
         )
       }
@@ -195,7 +195,7 @@
         decodeRes.sighash &&
         !uint8ArrayUIntBEEqual(s, decodeRes.s.value)
       ) {
-        $input = uint8ArrayToHex(
+        $input = bytesToHex(
           serializeDERSignature(decodeRes.r.value, s, decodeRes.sighash.value),
         )
       }
@@ -220,7 +220,7 @@
     on:focus={() => (highlighted = 'sighash')}
     on:blur={() => (highlighted = undefined)}
     on:change={(e) => {
-      const sighash = getSighashFlagByte(e.currentTarget?.value || '')
+      const sighash = getSighashFlagByte(e.currentTarget.value || '')
       if (
         decodeRes?.r &&
         decodeRes.s &&
@@ -228,7 +228,7 @@
         sighash !== undefined &&
         sighash !== decodeRes.sighash.value
       ) {
-        $input = uint8ArrayToHex(
+        $input = bytesToHex(
           serializeDERSignature(decodeRes.r.value, decodeRes.s.value, sighash),
         )
       }

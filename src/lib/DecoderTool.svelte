@@ -2,7 +2,7 @@
   import { FormGroup, Input } from '@sveltestrap/sveltestrap'
   import { decoderInput as input } from './stores/inputs'
   import Output from '$lib/Output.svelte'
-  import { hexToUint8Array } from '$lib/utils/uintarray'
+  import { hexToBytes } from '$lib/utils/uintarray'
   import { isValidHex } from '$lib/utils/validation'
 
   export let encoding: string
@@ -15,7 +15,7 @@
     $input = $input.trim()
     isValid = isValidHex($input)
     if (isValid) {
-      output = new TextDecoder(encoding).decode(hexToUint8Array($input))
+      output = new TextDecoder(encoding).decode(hexToBytes($input))
     }
   }
 </script>

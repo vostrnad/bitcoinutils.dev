@@ -1,9 +1,9 @@
 import {
   OutOfRangeError,
   Uint8ArrayReader,
-  uint8ArrayToHex,
-  uint8ArrayToIntLE,
-  uint8ArrayToUIntLE,
+  bytesToHex,
+  bytesToIntLE,
+  bytesToUIntLE,
 } from '$lib/utils/uintarray'
 
 export const range = (min: number, max: number): number[] => {
@@ -208,7 +208,7 @@ export function* getDecodeScriptGenerator(
         yield `OP_SUCCESS${byte}`
 
         if (reader.position !== script.length) {
-          yield uint8ArrayToHex(reader.read(script.length - reader.position))
+          yield bytesToHex(reader.read(script.length - reader.position))
         }
         continue
       }
@@ -262,21 +262,21 @@ export function* getDecodeScriptGenerator(
           if (options.showPushOps === 'all') yield `OP_PUSHDATA${lengthBytes}`
 
           const pushBytesArray = reader.read(lengthBytes)
-          pushBytes = uint8ArrayToUIntLE(pushBytesArray)
+          pushBytes = bytesToUIntLE(pushBytesArray)
           if (options.showPushOps === 'all' && options.showPushdataSize) {
             if (options.showShortDecimal) {
               yield pushBytes.toString()
             } else {
-              yield uint8ArrayToHex(pushBytesArray)
+              yield bytesToHex(pushBytesArray)
             }
           }
         }
 
         const subarray = reader.read(pushBytes)
         if (pushBytes <= 4 && options.showShortDecimal) {
-          yield uint8ArrayToIntLE(subarray).toString()
+          yield bytesToIntLE(subarray).toString()
         } else {
-          yield uint8ArrayToHex(subarray)
+          yield bytesToHex(subarray)
         }
         continue
       }

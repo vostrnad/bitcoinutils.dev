@@ -6,7 +6,7 @@
   import Output from '$lib/Output.svelte'
   import { scriptInput as input } from '$lib/stores/inputs'
   import { decodeScript } from '$lib/utils/bitcoin/script'
-  import { hexToUint8Array } from '$lib/utils/uintarray'
+  import { hexToBytes } from '$lib/utils/uintarray'
   import { isValidHex } from '$lib/utils/validation'
 
   const examples: Array<[string, string]> = [
@@ -108,7 +108,7 @@
     $input = $input.trim()
     isValid = isValidHex($input)
     if (isValid) {
-      output = decodeScript(hexToUint8Array($input), {
+      output = decodeScript(hexToBytes($input), {
         showPushOps,
         pushNumFormat,
         showPushdataSize,

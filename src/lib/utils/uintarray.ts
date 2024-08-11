@@ -4,7 +4,7 @@ const hexes = Array.from({ length: 256 }, (_, i) =>
   i.toString(16).padStart(2, '0'),
 )
 
-export const uint8ArrayToHex = (array: Uint8Array): string => {
+export const bytesToHex = (array: Uint8Array): string => {
   let res = ''
   for (const byte of array) {
     res += hexes[byte]
@@ -21,7 +21,7 @@ const hexToNum = (hex: string, pos: number) => {
   throw new Error('Character is not a hex number')
 }
 
-export const hexToUint8Array = (hex: string): Uint8Array => {
+export const hexToBytes = (hex: string): Uint8Array => {
   if (hex.length % 2 !== 0) {
     throw new Error('Hex string has odd length')
   }
@@ -36,12 +36,12 @@ export const hexToUint8Array = (hex: string): Uint8Array => {
   return array
 }
 
-export const uint8ArrayToUIntLE = (array: Uint8Array): number => {
+export const bytesToUIntLE = (array: Uint8Array): number => {
   return sum(Array.from(array).map((byte, index) => byte * 256 ** index))
 }
 
-export const uint8ArrayToIntLE = (array: Uint8Array): number => {
-  const uint = uint8ArrayToUIntLE(array)
+export const bytesToIntLE = (array: Uint8Array): number => {
+  const uint = bytesToUIntLE(array)
   const midpoint = 128 * 256 ** (array.length - 1)
   if (uint < midpoint) {
     return uint
@@ -49,7 +49,7 @@ export const uint8ArrayToIntLE = (array: Uint8Array): number => {
   return midpoint - uint
 }
 
-export const uint8ArrayToBigIntLE = (input: Uint8Array): bigint => {
+export const bytesToBigIntLE = (input: Uint8Array): bigint => {
   let res = 0n
   let p = 1n
   for (const byte of input) {
@@ -59,7 +59,7 @@ export const uint8ArrayToBigIntLE = (input: Uint8Array): bigint => {
   return res
 }
 
-export const uint8ArrayToBigIntBE = (input: Uint8Array): bigint => {
+export const bytesToBigIntBE = (input: Uint8Array): bigint => {
   let res = 0n
   let p = 1n
   for (let i = input.length - 1; i >= 0; i--) {
@@ -69,9 +69,7 @@ export const uint8ArrayToBigIntBE = (input: Uint8Array): bigint => {
   return res
 }
 
-export const uint8ArrayConcat = (
-  list: Array<Uint8Array | number>,
-): Uint8Array => {
+export const concatBytes = (list: Array<Uint8Array | number>): Uint8Array => {
   const length = sum(
     list.map((item) => (typeof item === 'number' ? 1 : item.length)),
   )
@@ -152,7 +150,7 @@ export class Uint8ArrayReader {
   }
 
   public readUIntLE(size: number): number {
-    return uint8ArrayToUIntLE(this.read(size))
+    return bytesToUIntLE(this.read(size))
   }
 
   private checkIfOutOfRange(endPosition: number) {

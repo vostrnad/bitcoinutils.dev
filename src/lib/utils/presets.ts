@@ -11,9 +11,9 @@ import {
 import { sha256d } from './hash'
 import { createPublicKey } from './secp256k1'
 import {
+  bytesToBigIntBE,
+  bytesToBigIntLE,
   uint8ArrayReverse,
-  uint8ArrayToBigIntBE,
-  uint8ArrayToBigIntLE,
 } from './uintarray'
 import { isNotUndefined } from './validation'
 
@@ -57,12 +57,12 @@ export const presets: CustomFunction[] = [
   {
     name: 'Hex to decimal (LE)',
     textInput: false,
-    fn: (arg) => uint8ArrayToBigIntLE(arg).toString(),
+    fn: (arg) => bytesToBigIntLE(arg).toString(),
   },
   {
     name: 'Hex to decimal (BE)',
     textInput: false,
-    fn: (arg) => uint8ArrayToBigIntBE(arg).toString(),
+    fn: (arg) => bytesToBigIntBE(arg).toString(),
   },
   {
     name: 'Public key (uncompressed)',

@@ -1,16 +1,16 @@
 import { sha256 } from '@noble/hashes/sha256'
 import { base58check, bech32, bech32m } from '@scure/base'
-import { uint8ArrayConcat } from '$lib/utils/uintarray'
+import { concatBytes } from '$lib/utils/uintarray'
 import { validateInputLength } from '$lib/utils/validation'
 
 export const getP2PKHAddress = (publicKeyHash: Uint8Array): string => {
   validateInputLength(publicKeyHash, 20)
-  return base58check(sha256).encode(uint8ArrayConcat([0x00, publicKeyHash]))
+  return base58check(sha256).encode(concatBytes([0x00, publicKeyHash]))
 }
 
 export const getP2SHAddress = (scriptHash: Uint8Array): string => {
   validateInputLength(scriptHash, 20)
-  return base58check(sha256).encode(uint8ArrayConcat([0x05, scriptHash]))
+  return base58check(sha256).encode(concatBytes([0x05, scriptHash]))
 }
 
 export const getP2WPKHAddress = (publicKeyHash: Uint8Array): string => {

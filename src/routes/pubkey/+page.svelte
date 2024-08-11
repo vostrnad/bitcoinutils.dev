@@ -4,11 +4,7 @@
   import { privateKeyInput as input } from '$lib/stores/inputs'
   import { getErrorMessage } from '$lib/utils/error'
   import { createPublicKey } from '$lib/utils/secp256k1'
-  import {
-    hexToUint8Array,
-    uint8ArrayConcat,
-    uint8ArrayToHex,
-  } from '$lib/utils/uintarray'
+  import { bytesToHex, concatBytes, hexToBytes } from '$lib/utils/uintarray'
   import { isValidHex } from '$lib/utils/validation'
 
   let publicKeyUncompressed: Uint8Array | undefined
@@ -32,7 +28,7 @@
       invalidReason = 'Input is not valid hex'
       return
     }
-    const privateKey = hexToUint8Array($input)
+    const privateKey = hexToBytes($input)
     try {
       publicKeyUncompressed = createPublicKey(privateKey, false)
     } catch (e) {
@@ -42,10 +38,7 @@
     publicKeyXOnly = publicKeyUncompressed.slice(1, 33)
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const parity = publicKeyUncompressed.at(-1)! & 1
-    publicKeyCompressed = uint8ArrayConcat([
-      parity ? 0x03 : 0x02,
-      ...publicKeyXOnly,
-    ])
+    publicKeyCompressed = concatBytes([parity ? 0x03 : 0x02, ...publicKeyXOnly])
   })()
 </script>
 
@@ -80,11 +73,11 @@
 
 {#if !invalidReason && publicKeyUncompressed && publicKeyCompressed && publicKeyXOnly}
   <Label>Uncompressed public key:</Label>
-  <Output output={uint8ArrayToHex(publicKeyUncompressed)} />
+  <Output output={bytesToHex(publicKeyUncompressed)} />
 
   <Label>Compressed public key:</Label>
-  <Output output={uint8ArrayToHex(publicKeyCompressed)} />
+  <Output output={bytesToHex(publicKeyCompressed)} />
 
   <Label>X-only public key:</Label>
-  <Output output={uint8ArrayToHex(publicKeyXOnly)} />
+  <Output output={bytesToHex(publicKeyXOnly)} />
 {/if}

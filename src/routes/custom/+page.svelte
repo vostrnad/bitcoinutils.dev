@@ -27,7 +27,7 @@
     presets,
     serializeCustomSequence,
   } from '$lib/utils/presets'
-  import { hexToUint8Array, uint8ArrayToHex } from '$lib/utils/uintarray'
+  import { bytesToHex, hexToBytes } from '$lib/utils/uintarray'
   import { isValidHex } from '$lib/utils/validation'
 
   const type: Writable<'utf8' | 'hex'> = getContext('hashInputType')
@@ -171,7 +171,7 @@
       }
     }
 
-    let temp = $type === 'hex' ? hexToUint8Array($input) : $input
+    let temp = $type === 'hex' ? hexToBytes($input) : $input
 
     const functions = $items.map((item) => item.preset)
     for (const [index, preset] of functions.entries()) {
@@ -188,7 +188,7 @@
         invalidReasonPosition = index
         break
       }
-      outputs.push(typeof temp === 'string' ? temp : uint8ArrayToHex(temp))
+      outputs.push(typeof temp === 'string' ? temp : bytesToHex(temp))
     }
   })()
 </script>

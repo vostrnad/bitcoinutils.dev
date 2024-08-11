@@ -12,7 +12,7 @@
     versionNumberInput as versionNumber,
   } from '$lib/stores/inputs'
   import { bech32TextToWords, bech32WordsToText } from '$lib/utils/bech32'
-  import { hexToUint8Array, uint8ArrayToHex } from '$lib/utils/uintarray'
+  import { bytesToHex, hexToBytes } from '$lib/utils/uintarray'
   import {
     isValidBech32Data,
     isValidBech32Hrp,
@@ -64,7 +64,7 @@
   let inputUint8Array = new Uint8Array()
 
   if (!$invalidInputReason && isValidHex($hexInput)) {
-    inputUint8Array = hexToUint8Array($hexInput)
+    inputUint8Array = hexToBytes($hexInput)
   }
 
   let output: string | undefined
@@ -111,7 +111,7 @@
   ) => {
     $hexInput = e.currentTarget.value.trim()
     if (isValidHex($hexInput)) {
-      inputUint8Array = hexToUint8Array($hexInput)
+      inputUint8Array = hexToBytes($hexInput)
       $bech32Input = bech32WordsToText(encoder.toWords(inputUint8Array))
       $invalidInputType = undefined
       $invalidInputReason = undefined
@@ -132,7 +132,7 @@
       const words = bech32TextToWords($bech32Input)
       try {
         inputUint8Array = encoder.fromWords(words)
-        $hexInput = uint8ArrayToHex(inputUint8Array)
+        $hexInput = bytesToHex(inputUint8Array)
         $invalidInputType = undefined
         $invalidInputReason = undefined
       } catch (error) {

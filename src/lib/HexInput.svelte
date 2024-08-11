@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Input } from '@sveltestrap/sveltestrap'
   import { createEventDispatcher } from 'svelte'
-  import { hexToUint8Array } from '$lib/utils/uintarray'
+  import { hexToBytes } from '$lib/utils/uintarray'
   import { isValidHex } from '$lib/utils/validation'
 
   export let input: string
@@ -30,7 +30,7 @@
     if (isValidHex(input)) {
       if (input !== lastValidInput) {
         lastValidInput = stripLeadingZeros ? input.replace(/^(00)*/, '') : input
-        dispatch('change', hexToUint8Array(lastValidInput))
+        dispatch('change', hexToBytes(lastValidInput))
       }
     } else {
       invalid = true
