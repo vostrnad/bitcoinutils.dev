@@ -30,6 +30,15 @@
   )
 </script>
 
+<svelte:head>
+  {#if import.meta.env.VITE_UMAMI_ENABLED}
+    <script
+      defer
+      src="https://umami.vstr.cz/script.js"
+      data-website-id="1d798527-0c47-4d95-af66-64bfbad11e20"
+    ></script>{/if}
+</svelte:head>
+
 <Navbar container={false} expand="md" color="body-tertiary" class="shadow-sm">
   <Container md class="justify-content-start">
     <NavbarToggler class="me-3" on:click={toggleSidebar} />
