@@ -1,8 +1,6 @@
-import { sum } from './array'
+import { createArray, sum } from './array'
 
-const hexes = Array.from({ length: 256 }, (_, i) =>
-  i.toString(16).padStart(2, '0'),
-)
+const hexes = createArray(256, (i) => i.toString(16).padStart(2, '0'))
 
 export const bytesToHex = (array: Uint8Array): string => {
   let res = ''

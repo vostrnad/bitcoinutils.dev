@@ -5,7 +5,7 @@
   import LabeledInputRow from '$lib/LabeledInputRow.svelte'
   import Output from '$lib/Output.svelte'
   import { scriptInput as input } from '$lib/stores/inputs'
-  import { decodeScript } from '$lib/utils/bitcoin/script'
+  import { decodeScript } from '$lib/utils/bitcoin/script/decode'
   import { hexToBytes } from '$lib/utils/uintarray'
   import { isValidHex } from '$lib/utils/validation'
 
