@@ -38,6 +38,35 @@ export const bytesToUIntLE = (array: Uint8Array): number => {
   return sum(Array.from(array).map((byte, index) => byte * 256 ** index))
 }
 
+export const intLEToBytes = (n: number | bigint): Uint8Array => {
+  n = BigInt(n)
+  if (n === 0n) return new Uint8Array()
+  const array: number[] = []
+
+  let absN = n < 0 ? -n : n
+  while (absN > 0) {
+    array.push(Number(absN & 0xffn))
+    absN >>= 8n
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const msbSet = array.at(-1)! >= 0x80
+
+  if (!msbSet && n < 0) {
+    array[array.length - 1] += 0x80
+  }
+
+  if (msbSet) {
+    if (n >= 0) {
+      array.push(0x00)
+    } else {
+      array.push(0x80)
+    }
+  }
+
+  return new Uint8Array(array)
+}
+
 export const bytesToIntLE = (array: Uint8Array): number => {
   const uint = bytesToUIntLE(array)
   const midpoint = 128 * 256 ** (array.length - 1)
