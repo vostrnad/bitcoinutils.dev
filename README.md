@@ -1,41 +1,38 @@
-# create-svelte
+# bitcoinutils.dev
 
-Everything you need to build a Svelte project, powered by
-[`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+This web application provides a number of tools and utilities useful to Bitcoin
+developers and other technically advanced users.
 
-## Creating a project
+## Requesting a feature
 
-If you're seeing this, you've probably already done this step. Congrats!
+If you want to request a new tool or an improvement to an existing tool, open a
+GitHub issue. As long as it's useful and Bitcoin-related, I'll be happy to
+implement it.
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+## Contributing
 
-# create a new project in my-app
-npm create svelte@latest my-app
+Contributions are welcome, especially bug fixes and UI/UX improvements. New
+features I'm happy to implement myself, see above.
+
+## Running
+
+You will need [Node.js](https://nodejs.org) and
+[Yarn](https://classic.yarnpkg.com).
+
+Install dependencies:
+
+```
+yarn
 ```
 
-## Developing
+Run a local dev server:
 
-Once you've created a project and installed dependencies with `npm install` (or
-`pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+```
+yarn dev
 ```
 
-## Building
+Build for production:
 
-To create a production version of your app:
-
-```bash
-npm run build
 ```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an
-> [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+yarn build
+```
