@@ -10,6 +10,18 @@
 
 <dl>
   <dt>
+    <PageAnchor id="source-code" />
+    Where do I find the source code?
+  </dt>
+  <dd>
+    In the <a
+      target="_blank"
+      rel="noreferrer"
+      href="https://github.com/vostrnad/bitcoinutils.dev">GitHub repository</a
+    >.
+  </dd>
+
+  <dt>
     <PageAnchor id="debugger-initial-stack" />
     How do I add an initial stack to a script?
   </dt>
