@@ -2,6 +2,9 @@
   import './app.css'
   import {
     Container,
+    Nav,
+    NavItem,
+    NavLink,
     Navbar,
     NavbarBrand,
     NavbarToggler,
@@ -43,6 +46,11 @@
   <Container md class="justify-content-start">
     <NavbarToggler class="me-3" on:click={toggleSidebar} />
     <NavbarBrand href="/">bitcoinutils.dev</NavbarBrand>
+    <Nav class="ms-auto me-2" navbar>
+      <NavItem>
+        <NavLink href="/faq">FAQ</NavLink>
+      </NavItem>
+    </Nav>
   </Container>
 </Navbar>
 

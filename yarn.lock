@@ -3183,6 +3183,11 @@ synckit@0.8.6:
     "@pkgr/utils" "^2.4.2"
     tslib "^2.6.2"
 
+text-field-edit@^4.1.1:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/text-field-edit/-/text-field-edit-4.1.1.tgz#a0c69b954ab1d1c8e46b0cc484480ef07d1107d6"
+  integrity sha512-bgvsU5CFdBm8YuDdpLALNqS7Th8bVaRD5cww9VMYaBYab324iN3XOXvuQxTxp9JSPhHHF6zGCDEyF08JUV2hPw==
+
 text-table@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"

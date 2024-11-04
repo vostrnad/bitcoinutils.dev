@@ -43,6 +43,7 @@ export interface DecodeOptions {
   showPushdataSize: boolean
   showShortDecimal: boolean
   isTapscript: boolean
+  throwOnError: boolean
 }
 
 export function* getDecodeScriptGenerator(
@@ -57,6 +58,7 @@ export function* getDecodeScriptGenerator(
     showPushdataSize: true,
     showShortDecimal: false,
     isTapscript: false,
+    throwOnError: false,
     ...options,
   }
 
@@ -91,7 +93,7 @@ export function* getDecodeScriptGenerator(
             yield `OP_PUSHNUM_${number}`
           }
         } else {
-          if (options.showShortDecimal) {
+          if (options.showShortDecimal || byte === OP_0) {
             yield number.toString()
           } else {
             yield number.toString(16).padStart(2, '0')
@@ -133,7 +135,7 @@ export function* getDecodeScriptGenerator(
         }
 
         const subarray = reader.read(pushBytes)
-        if (pushBytes <= 4 && options.showShortDecimal) {
+        if (pushBytes === 0 || (pushBytes <= 4 && options.showShortDecimal)) {
           yield bytesToIntLE(subarray).toString()
         } else {
           yield bytesToHex(subarray)
@@ -144,7 +146,7 @@ export function* getDecodeScriptGenerator(
       yield `OP_UNKNOWN`
     }
   } catch (e) {
-    if (e instanceof OutOfRangeError) {
+    if (!options.throwOnError && e instanceof OutOfRangeError) {
       yield '[error]'
     } else {
       throw e

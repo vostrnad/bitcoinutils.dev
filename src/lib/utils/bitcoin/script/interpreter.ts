@@ -9,9 +9,21 @@
 import { ripemd160 } from '@noble/hashes/ripemd160'
 import { sha1 } from '@noble/hashes/sha1'
 import { sha256 } from '@noble/hashes/sha256'
+import {
+  isAnyKnownPublicKey,
+  isAnyPreTapscriptKey,
+  isHybridKey,
+  isXOnlyKey,
+} from '$lib/utils/bitcoin/pubkey'
+import {
+  isAnyKnownSignature,
+  isValidDERSignature,
+  isValidSchnorrSignature,
+} from '$lib/utils/bitcoin/signature'
 import { mod } from '$lib/utils/number'
 import {
   Uint8ArrayReader,
+  bytesToHex,
   bytesToIntLE,
   bytesToUIntLE,
   intLEToBytes,
@@ -155,6 +167,7 @@ const OP_CHECKSIGADD = 0xba
 
 const MAX_PUBKEYS_PER_MULTISIG = 20
 
+const SCRIPT_ERR_UNKNOWN_ERROR = 1
 const SCRIPT_ERR_OP_RETURN = 3
 const SCRIPT_ERR_SIG_COUNT = 8
 const SCRIPT_ERR_PUBKEY_COUNT = 9
@@ -170,6 +183,52 @@ const SCRIPT_ERR_INVALID_ALTSTACK_OPERATION = 18
 const SCRIPT_ERR_UNBALANCED_CONDITIONAL = 19
 const SCRIPT_ERR_NEGATIVE_LOCKTIME = 20
 const SCRIPT_ERR_SIG_NULLDUMMY = 27
+
+const errorMessageMap = {
+  [SCRIPT_ERR_UNKNOWN_ERROR]: 'unknown error',
+  [SCRIPT_ERR_OP_RETURN]: 'OP_RETURN encountered during execution',
+  [SCRIPT_ERR_SIG_COUNT]: 'invalid signature count',
+  [SCRIPT_ERR_PUBKEY_COUNT]: 'invalid pubkey count',
+  [SCRIPT_ERR_VERIFY]: 'OP_VERIFY operation failed',
+  [SCRIPT_ERR_EQUALVERIFY]: 'OP_EQUALVERIFY operation failed',
+  [SCRIPT_ERR_CHECKMULTISIGVERIFY]: 'OP_CHECKMULTISIGVERIFY operation failed',
+  [SCRIPT_ERR_CHECKSIGVERIFY]: 'OP_CHECKSIGVERIFY operation failed',
+  [SCRIPT_ERR_NUMEQUALVERIFY]: 'OP_NUMEQUALVERIFY operation failed',
+  [SCRIPT_ERR_BAD_OPCODE]: 'bad opcode',
+  [SCRIPT_ERR_DISABLED_OPCODE]: 'disabled opcode',
+  [SCRIPT_ERR_INVALID_STACK_OPERATION]:
+    'operation not valid with the current stack size',
+  [SCRIPT_ERR_INVALID_ALTSTACK_OPERATION]:
+    'operation not valid with the current altstack size',
+  [SCRIPT_ERR_UNBALANCED_CONDITIONAL]: 'unbalanced conditional',
+  [SCRIPT_ERR_NEGATIVE_LOCKTIME]: 'negative locktime',
+  [SCRIPT_ERR_SIG_NULLDUMMY]: 'dummy OP_CHECKMULTISIG argument must be zero',
+}
+
+enum ScriptWarning {
+  emptyStack,
+  dirtyStack,
+  falseTopStackItem,
+  nop,
+  codeseparator,
+  mixedCheckMultisigAndCheckSigAdd,
+  nonMinimalIf,
+}
+
+const warningMessageMap: Record<ScriptWarning, string> = {
+  [ScriptWarning.emptyStack]:
+    'final stack should have exactly one item but is empty',
+  [ScriptWarning.dirtyStack]: 'final stack should only have one item',
+  [ScriptWarning.falseTopStackItem]: 'top stack item should be a true value',
+  [ScriptWarning.nop]: 'OP_NOP is non-standard',
+  [ScriptWarning.codeseparator]:
+    'OP_CODESEPARATOR behavior is not implemented in this debugger',
+  [ScriptWarning.mixedCheckMultisigAndCheckSigAdd]:
+    'OP_CHECKMULTISIG and OP_CHECKSIGADD cannot be used in the same script',
+  [ScriptWarning.nonMinimalIf]: 'argument of OP_IF/NOTIF is not minimal',
+}
+
+type ScriptErrorCode = keyof typeof errorMessageMap
 
 class ConditionStack {
   // A constant for firstFalsePos to indicate there are no falses.
@@ -233,14 +292,21 @@ const castToBool = (vch: Uint8Array) => {
 export interface ScriptStep {
   position: number
   stack: Uint8Array[]
+  highlight?: {
+    count: number
+    color: 'stack' | 'success' | 'error'
+  }
 }
 
 export interface EvalScriptResult {
   error?: {
     position: number
     code: number
+    message: string
   }
+  warnings: string[]
   stack: Uint8Array[]
+  steps: ScriptStep[]
 }
 
 export const evalScript = (
@@ -252,6 +318,14 @@ export const evalScript = (
   const stack = [...initialStack]
   const altstack: Uint8Array[] = []
 
+  const steps: ScriptStep[] = [{ position: -1, stack: [...stack] }]
+
+  const warnings = new Set<ScriptWarning | string>()
+  const usedOpcodes = new Set<number>()
+  const usedPubkeyTypes = new Set<'pretapscript' | 'xonly'>()
+  const usedSigTypes = new Set<'der' | 'schnorr'>()
+
+  let loopHighlight: ScriptStep['highlight']
   let loopStartReaderPosition = 0
 
   const stacktop = (n = -1) => stack.at(n)
@@ -265,13 +339,93 @@ export const evalScript = (
     stack[a] = stack[b]
     stack[b] = temp
   }
-  const setError = (errCode: number): EvalScriptResult => {
+  const getWarningMessages = () => {
+    return Array.from(warnings).map((warning) => {
+      if (typeof warning === 'string') {
+        return warning
+      }
+      return warningMessageMap[warning]
+    })
+  }
+  const setError = (
+    code: ScriptErrorCode,
+    message?: string,
+  ): EvalScriptResult => {
+    if (steps.at(-1)?.position !== loopStartReaderPosition) {
+      steps.push({
+        position: loopStartReaderPosition,
+        stack: [...stack],
+        highlight: loopHighlight || { count: 0, color: 'error' },
+      })
+    }
     return {
       error: {
-        code: errCode,
+        code,
         position: loopStartReaderPosition,
+        message: message || errorMessageMap[code],
       },
       stack,
+      steps,
+      warnings: getWarningMessages(),
+    }
+  }
+  const setStackSizeError = (expected: number) => {
+    steps.push({
+      position: loopStartReaderPosition,
+      stack: [...stack],
+      highlight: {
+        count: stack.length,
+        color: 'error',
+      },
+    })
+    const message =
+      expected === 1
+        ? 'operation requires at least one stack item'
+        : `operation requires at least ${expected} stack items`
+    return setError(SCRIPT_ERR_INVALID_STACK_OPERATION, message)
+  }
+  const checkSignaturePubkeyWarnings = (
+    sig: Uint8Array,
+    pubkey: Uint8Array,
+    tapscript?: boolean,
+  ) => {
+    if (sig.length > 0) {
+      if (isValidDERSignature(sig)) usedSigTypes.add('der')
+      else if (isValidSchnorrSignature(sig)) usedSigTypes.add('schnorr')
+    }
+    if (pubkey.length > 0) {
+      if (isAnyPreTapscriptKey(pubkey)) usedPubkeyTypes.add('pretapscript')
+      else if (isXOnlyKey(pubkey)) usedPubkeyTypes.add('xonly')
+    }
+
+    if (tapscript) {
+      if (sig.length > 0 && !isValidSchnorrSignature(sig)) {
+        warnings.add(`${bytesToHex(sig)} is not a valid Schnorr signature`)
+      }
+      if (pubkey.length > 0 && !isXOnlyKey(pubkey)) {
+        warnings.add(`${bytesToHex(pubkey)} is not a valid x-only public key`)
+      }
+      return
+    }
+    if (tapscript === false) {
+      if (sig.length > 0 && !isValidDERSignature(sig)) {
+        warnings.add(`${bytesToHex(sig)} is not a valid DER signature`)
+      }
+      if (pubkey.length > 0 && !isAnyPreTapscriptKey(pubkey)) {
+        warnings.add(
+          `${bytesToHex(pubkey)} is not a valid compressed or uncompressed key`,
+        )
+      }
+      return
+    }
+    if (sig.length > 0 && !isAnyKnownSignature(sig)) {
+      warnings.add(`${bytesToHex(sig)} is not a valid signature`)
+    }
+    if (pubkey.length > 0 && !isAnyKnownPublicKey(pubkey)) {
+      warnings.add(`${bytesToHex(pubkey)} is not a valid public key`)
+    }
+    if (isHybridKey(pubkey)) {
+      warnings.add('hybrid public keys are non-standard')
     }
   }
 
@@ -282,6 +436,7 @@ export const evalScript = (
 
   while (reader.position < script.length) {
     loopStartReaderPosition = reader.position
+    loopHighlight = undefined
 
     const fExec = vfExec.allTrue()
     const opcode = reader.readByte()
@@ -330,6 +485,14 @@ export const evalScript = (
 
       if (fExec) {
         stack.push(pushValue)
+        steps.push({
+          position: loopStartReaderPosition,
+          stack: [...stack],
+          highlight: {
+            count: 1,
+            color: 'stack',
+          },
+        })
       }
 
       continue
@@ -342,6 +505,7 @@ export const evalScript = (
     switch (opcode) {
       case OP_0:
         stack.push(new Uint8Array())
+        loopHighlight = { count: 1, color: 'stack' }
         break
 
       case OP_1NEGATE:
@@ -362,6 +526,7 @@ export const evalScript = (
       case OP_15:
       case OP_16:
         stack.push(intLEToBytes(opcode - OP_1 + 1))
+        loopHighlight = { count: 1, color: 'stack' }
         break
 
       case OP_NOP:
@@ -373,20 +538,32 @@ export const evalScript = (
       case OP_NOP8:
       case OP_NOP9:
       case OP_NOP10:
+        warnings.add(ScriptWarning.nop)
         break
 
       case OP_CHECKLOCKTIMEVERIFY:
       case OP_CHECKSEQUENCEVERIFY: {
         if (stack.length === 0) {
-          return setError(SCRIPT_ERR_INVALID_STACK_OPERATION)
+          return setStackSizeError(1)
         }
 
-        const value = bytesToIntLE(stacktop()!)
+        const vch = stacktop()!
+        if (vch.length > 5) {
+          loopHighlight = { count: 1, color: 'error' }
+          return setError(
+            SCRIPT_ERR_UNKNOWN_ERROR,
+            'locktime is larger than 5 bytes',
+          )
+        }
+
+        const value = bytesToIntLE(vch)
 
         if (value < 0) {
+          loopHighlight = { count: 1, color: 'error' }
           return setError(SCRIPT_ERR_NEGATIVE_LOCKTIME)
         }
 
+        loopHighlight = { count: 1, color: 'success' }
         break
       }
 
@@ -397,9 +574,17 @@ export const evalScript = (
           let fValue = false
           if (fExec) {
             if (stack.length === 0) {
-              return setError(SCRIPT_ERR_UNBALANCED_CONDITIONAL)
+              return setError(
+                SCRIPT_ERR_UNBALANCED_CONDITIONAL,
+                'operation requires at least one stack item',
+              )
             }
             const vch = stacktop()!
+
+            if (vch.length > 1 || (vch.length === 1 && vch[0] !== 0x01)) {
+              warnings.add(ScriptWarning.nonMinimalIf)
+            }
+
             fValue = castToBool(vch)
             if (opcode === OP_NOTIF) {
               fValue = !fValue
@@ -412,14 +597,20 @@ export const evalScript = (
 
       case OP_ELSE:
         if (vfExec.empty()) {
-          return setError(SCRIPT_ERR_UNBALANCED_CONDITIONAL)
+          return setError(
+            SCRIPT_ERR_UNBALANCED_CONDITIONAL,
+            'OP_ELSE encountered without a conditional',
+          )
         }
         vfExec.toggleTop()
         break
 
       case OP_ENDIF:
         if (vfExec.empty()) {
-          return setError(SCRIPT_ERR_UNBALANCED_CONDITIONAL)
+          return setError(
+            SCRIPT_ERR_UNBALANCED_CONDITIONAL,
+            'OP_ENDIF encountered without a conditional',
+          )
         }
         vfExec.popBack()
         break
@@ -427,12 +618,13 @@ export const evalScript = (
       case OP_VERIFY:
         {
           if (stack.length === 0) {
-            return setError(SCRIPT_ERR_INVALID_STACK_OPERATION)
+            return setStackSizeError(1)
           }
           const fValue = castToBool(stacktop()!)
           if (fValue) {
             popstack()
           } else {
+            loopHighlight = { count: 1, color: 'error' }
             return setError(SCRIPT_ERR_VERIFY)
           }
         }
@@ -443,7 +635,7 @@ export const evalScript = (
 
       case OP_TOALTSTACK:
         if (stack.length === 0) {
-          return setError(SCRIPT_ERR_INVALID_STACK_OPERATION)
+          return setStackSizeError(1)
         }
         altstack.push(stacktop()!)
         popstack()
@@ -451,16 +643,20 @@ export const evalScript = (
 
       case OP_FROMALTSTACK:
         if (altstack.length === 0) {
-          return setError(SCRIPT_ERR_INVALID_ALTSTACK_OPERATION)
+          return setError(
+            SCRIPT_ERR_INVALID_ALTSTACK_OPERATION,
+            'operation requires at least one altstack item',
+          )
         }
         stack.push(altstacktop()!)
         popaltstack()
+        loopHighlight = { count: 1, color: 'stack' }
         break
 
       case OP_2DROP:
         // (x1 x2 -- )
         if (stack.length < 2) {
-          return setError(SCRIPT_ERR_INVALID_STACK_OPERATION)
+          return setStackSizeError(2)
         }
         popstack()
         popstack()
@@ -470,11 +666,12 @@ export const evalScript = (
         {
           // (x1 x2 -- x1 x2 x1 x2)
           if (stack.length < 2) {
-            return setError(SCRIPT_ERR_INVALID_STACK_OPERATION)
+            return setStackSizeError(2)
           }
           const vch1 = stacktop(-2)!
           const vch2 = stacktop(-1)!
           stack.push(vch1, vch2)
+          loopHighlight = { count: 2, color: 'stack' }
         }
         break
 
@@ -482,12 +679,13 @@ export const evalScript = (
         {
           // (x1 x2 x3 -- x1 x2 x3 x1 x2 x3)
           if (stack.length < 3) {
-            return setError(SCRIPT_ERR_INVALID_STACK_OPERATION)
+            return setStackSizeError(3)
           }
           const vch1 = stacktop(-3)!
           const vch2 = stacktop(-2)!
           const vch3 = stacktop(-1)!
           stack.push(vch1, vch2, vch3)
+          loopHighlight = { count: 3, color: 'stack' }
         }
         break
 
@@ -495,11 +693,12 @@ export const evalScript = (
         {
           // (x1 x2 x3 x4 -- x1 x2 x3 x4 x1 x2)
           if (stack.length < 4) {
-            return setError(SCRIPT_ERR_INVALID_STACK_OPERATION)
+            return setStackSizeError(4)
           }
           const vch1 = stacktop(-4)!
           const vch2 = stacktop(-3)!
           stack.push(vch1, vch2)
+          loopHighlight = { count: 2, color: 'stack' }
         }
         break
 
@@ -507,43 +706,49 @@ export const evalScript = (
         {
           // (x1 x2 x3 x4 x5 x6 -- x3 x4 x5 x6 x1 x2)
           if (stack.length < 6) {
-            return setError(SCRIPT_ERR_INVALID_STACK_OPERATION)
+            return setStackSizeError(6)
           }
           const vch1 = stacktop(-6)!
           const vch2 = stacktop(-5)!
           stack.splice(-6, 2)
           stack.push(vch1, vch2)
+          loopHighlight = { count: 6, color: 'stack' }
         }
         break
 
       case OP_2SWAP:
         // (x1 x2 x3 x4 -- x3 x4 x1 x2)
         if (stack.length < 4) {
-          return setError(SCRIPT_ERR_INVALID_STACK_OPERATION)
+          return setStackSizeError(4)
         }
         swap(-4, -2)
         swap(-3, -1)
+        loopHighlight = { count: 4, color: 'stack' }
         break
 
       case OP_IFDUP:
         {
           // (x - 0 | x x)
           if (stack.length === 0) {
-            return setError(SCRIPT_ERR_INVALID_STACK_OPERATION)
+            return setStackSizeError(1)
           }
           const vch = stacktop()!
-          if (castToBool(vch)) stack.push(vch)
+          if (castToBool(vch)) {
+            stack.push(vch)
+            loopHighlight = { count: 1, color: 'stack' }
+          }
         }
         break
 
       case OP_DEPTH:
         stack.push(intLEToBytes(stack.length))
+        loopHighlight = { count: 1, color: 'stack' }
         break
 
       case OP_DROP:
         // (x -- )
         if (stack.length === 0) {
-          return setError(SCRIPT_ERR_INVALID_STACK_OPERATION)
+          return setStackSizeError(1)
         }
         popstack()
         break
@@ -552,29 +757,32 @@ export const evalScript = (
         {
           // (x -- x x)
           if (stack.length === 0) {
-            return setError(SCRIPT_ERR_INVALID_STACK_OPERATION)
+            return setStackSizeError(1)
           }
           const vch = stacktop()!
           stack.push(vch)
+          loopHighlight = { count: 1, color: 'stack' }
         }
         break
 
       case OP_NIP:
         // (x1 x2 -- x2)
         if (stack.length < 2) {
-          return setError(SCRIPT_ERR_INVALID_STACK_OPERATION)
+          return setStackSizeError(2)
         }
         stack.splice(-2, 1)
+        loopHighlight = { count: 1, color: 'stack' }
         break
 
       case OP_OVER:
         {
           // (x1 x2 -- x1 x2 x1)
           if (stack.length < 2) {
-            return setError(SCRIPT_ERR_INVALID_STACK_OPERATION)
+            return setStackSizeError(2)
           }
           const vch = stacktop(-2)!
           stack.push(vch)
+          loopHighlight = { count: 1, color: 'stack' }
         }
         break
 
@@ -584,18 +792,23 @@ export const evalScript = (
           // (xn ... x2 x1 x0 n - xn ... x2 x1 x0 xn)
           // (xn ... x2 x1 x0 n - ... x2 x1 x0 xn)
           if (stack.length < 2) {
-            return setError(SCRIPT_ERR_INVALID_STACK_OPERATION)
+            return setStackSizeError(2)
           }
           const n = bytesToIntLE(stacktop()!)
           popstack()
           if (n < 0 || n >= stack.length) {
-            return setError(SCRIPT_ERR_INVALID_STACK_OPERATION)
+            return setStackSizeError(n + 1)
           }
           const vch = stacktop(-n - 1)!
           if (opcode === OP_ROLL) {
             stack.splice(-n - 1, 1)
           }
           stack.push(vch)
+          if (opcode === OP_ROLL) {
+            loopHighlight = { count: n + 1, color: 'stack' }
+          } else {
+            loopHighlight = { count: 1, color: 'stack' }
+          }
         }
         break
 
@@ -604,37 +817,41 @@ export const evalScript = (
         //  x2 x1 x3  after first swap
         //  x2 x3 x1  after second swap
         if (stack.length < 3) {
-          return setError(SCRIPT_ERR_INVALID_STACK_OPERATION)
+          return setStackSizeError(3)
         }
         swap(-3, -2)
         swap(-2, -1)
+        loopHighlight = { count: 3, color: 'stack' }
         break
 
       case OP_SWAP:
         // (x1 x2 -- x2 x1)
         if (stack.length < 2) {
-          return setError(SCRIPT_ERR_INVALID_STACK_OPERATION)
+          return setStackSizeError(2)
         }
         swap(-2, -1)
+        loopHighlight = { count: 2, color: 'stack' }
         break
 
       case OP_TUCK:
         {
           // (x1 x2 -- x2 x1 x2)
           if (stack.length < 2) {
-            return setError(SCRIPT_ERR_INVALID_STACK_OPERATION)
+            return setStackSizeError(2)
           }
           const vch = stacktop()!
           stack.splice(-2, 0, vch)
+          loopHighlight = { count: 3, color: 'stack' }
         }
         break
 
       case OP_SIZE:
         // (in -- in size)
         if (stack.length === 0) {
-          return setError(SCRIPT_ERR_INVALID_STACK_OPERATION)
+          return setStackSizeError(1)
         }
         stack.push(intLEToBytes(stacktop()!.length))
+        loopHighlight = { count: 1, color: 'stack' }
         break
 
       //
@@ -645,7 +862,7 @@ export const evalScript = (
         {
           // (x1 x2 - bool)
           if (stack.length < 2) {
-            return setError(SCRIPT_ERR_INVALID_STACK_OPERATION)
+            return setStackSizeError(2)
           }
           const vch1 = stacktop(-2)!
           const vch2 = stacktop(-1)!
@@ -656,8 +873,11 @@ export const evalScript = (
           if (opcode === OP_EQUALVERIFY) {
             if (fEqual) popstack()
             else {
+              loopHighlight = { count: 1, color: 'error' }
               return setError(SCRIPT_ERR_EQUALVERIFY)
             }
+          } else {
+            loopHighlight = { count: 1, color: 'success' }
           }
         }
         break
@@ -674,9 +894,17 @@ export const evalScript = (
         {
           // (in -- out)
           if (stack.length === 0) {
-            return setError(SCRIPT_ERR_INVALID_STACK_OPERATION)
+            return setStackSizeError(1)
           }
-          let bn = bytesToIntLE(stacktop()!)
+          const vch = stacktop()!
+          if (vch.length > 4) {
+            loopHighlight = { count: 1, color: 'error' }
+            return setError(
+              SCRIPT_ERR_UNKNOWN_ERROR,
+              'numeric argument is larger than 4 bytes',
+            )
+          }
+          let bn = bytesToIntLE(vch)
           switch (opcode) {
             case OP_1ADD:
               bn += 1
@@ -699,6 +927,7 @@ export const evalScript = (
           }
           popstack()
           stack.push(intLEToBytes(bn))
+          loopHighlight = { count: 1, color: 'success' }
         }
         break
 
@@ -718,10 +947,19 @@ export const evalScript = (
         {
           // (x1 x2 -- out)
           if (stack.length < 2) {
-            return setError(SCRIPT_ERR_INVALID_STACK_OPERATION)
+            return setStackSizeError(2)
           }
-          const bn1 = bytesToIntLE(stacktop(-2)!)
-          const bn2 = bytesToIntLE(stacktop(-1)!)
+          const vch1 = stacktop(-2)!
+          const vch2 = stacktop(-1)!
+          if (vch1.length > 4 || vch2.length > 4) {
+            loopHighlight = { count: 2, color: 'error' }
+            return setError(
+              SCRIPT_ERR_UNKNOWN_ERROR,
+              'numeric argument is larger than 4 bytes',
+            )
+          }
+          const bn1 = bytesToIntLE(vch1)
+          const bn2 = bytesToIntLE(vch2)
           let bn: number | boolean = 0
           switch (opcode) {
             case OP_ADD:
@@ -772,8 +1010,11 @@ export const evalScript = (
             if (castToBool(stacktop(-1)!)) {
               popstack()
             } else {
+              loopHighlight = { count: 1, color: 'error' }
               return setError(SCRIPT_ERR_NUMEQUALVERIFY)
             }
+          } else {
+            loopHighlight = { count: 1, color: 'success' }
           }
         }
         break
@@ -782,7 +1023,7 @@ export const evalScript = (
         {
           // (x min max -- out)
           if (stack.length < 3) {
-            return setError(SCRIPT_ERR_INVALID_STACK_OPERATION)
+            return setStackSizeError(3)
           }
           const bn1 = bytesToIntLE(stacktop(-3)!)
           const bn2 = bytesToIntLE(stacktop(-2)!)
@@ -792,6 +1033,7 @@ export const evalScript = (
           popstack()
           popstack()
           stack.push(fValue ? vchTrue : vchFalse)
+          loopHighlight = { count: 1, color: 'success' }
         }
         break
 
@@ -806,7 +1048,7 @@ export const evalScript = (
         {
           // (in -- hash)
           if (stack.length === 0) {
-            return setError(SCRIPT_ERR_INVALID_STACK_OPERATION)
+            return setStackSizeError(1)
           }
           const vch = stacktop(-1)!
           let vchHash: Uint8Array
@@ -829,10 +1071,12 @@ export const evalScript = (
           }
           popstack()
           stack.push(vchHash)
+          loopHighlight = { count: 1, color: 'success' }
         }
         break
 
       case OP_CODESEPARATOR:
+        warnings.add(ScriptWarning.codeseparator)
         break
 
       case OP_CHECKSIG:
@@ -840,7 +1084,7 @@ export const evalScript = (
         {
           // (sig pubkey -- bool)
           if (stack.length < 2) {
-            return setError(SCRIPT_ERR_INVALID_STACK_OPERATION)
+            return setStackSizeError(2)
           }
 
           const vchSig = stacktop(-2)!
@@ -848,12 +1092,19 @@ export const evalScript = (
 
           const success = vchSig.length > 0 && vchPubKey.length > 0
 
+          checkSignaturePubkeyWarnings(vchSig, vchPubKey)
+
           popstack()
           popstack()
           stack.push(success ? vchTrue : vchFalse)
           if (opcode === OP_CHECKSIGVERIFY) {
             if (success) popstack()
-            else return setError(SCRIPT_ERR_CHECKSIGVERIFY)
+            else {
+              loopHighlight = { count: 1, color: 'error' }
+              return setError(SCRIPT_ERR_CHECKSIGVERIFY)
+            }
+          } else {
+            loopHighlight = { count: 1, color: 'success' }
           }
         }
         break
@@ -862,7 +1113,7 @@ export const evalScript = (
         {
           // (sig num pubkey -- num)
           if (stack.length < 3) {
-            return setError(SCRIPT_ERR_INVALID_STACK_OPERATION)
+            return setStackSizeError(3)
           }
 
           const sig = stacktop(-3)!
@@ -871,10 +1122,13 @@ export const evalScript = (
 
           const success = sig.length > 0 && pubkey.length > 0
 
+          checkSignaturePubkeyWarnings(sig, pubkey, true)
+
           popstack()
           popstack()
           popstack()
           stack.push(intLEToBytes(num + (success ? 1 : 0)))
+          loopHighlight = { count: 1, color: 'success' }
         }
         break
 
@@ -885,12 +1139,17 @@ export const evalScript = (
 
           let i = 1
           if (stack.length < i) {
-            return setError(SCRIPT_ERR_INVALID_STACK_OPERATION)
+            return setStackSizeError(i)
           }
 
           let nKeysCount = bytesToIntLE(stacktop(-i)!)
           if (nKeysCount < 0 || nKeysCount > MAX_PUBKEYS_PER_MULTISIG) {
-            return setError(SCRIPT_ERR_PUBKEY_COUNT)
+            loopHighlight = { count: 1, color: 'error' }
+            const message =
+              nKeysCount < 0
+                ? 'number of public keys cannot be negative'
+                : `number of public keys cannot be higher than ${MAX_PUBKEYS_PER_MULTISIG}`
+            return setError(SCRIPT_ERR_PUBKEY_COUNT, message)
           }
           let ikey = ++i
           // ikey2 is the position of last non-signature item in the stack. Top stack item = 1.
@@ -898,17 +1157,22 @@ export const evalScript = (
           let ikey2 = nKeysCount + 2
           i += nKeysCount
           if (stack.length < i) {
-            return setError(SCRIPT_ERR_INVALID_STACK_OPERATION)
+            return setStackSizeError(i)
           }
 
           let nSigsCount = bytesToIntLE(stacktop(-i)!)
           if (nSigsCount < 0 || nSigsCount > nKeysCount) {
-            return setError(SCRIPT_ERR_SIG_COUNT)
+            loopHighlight = { count: ikey2, color: 'error' }
+            const message =
+              nSigsCount < 0
+                ? 'number of signatures cannot be negative'
+                : `number of signatures cannot be higher than number of public keys`
+            return setError(SCRIPT_ERR_SIG_COUNT, message)
           }
           let isig = ++i
           i += nSigsCount
           if (stack.length < i) {
-            return setError(SCRIPT_ERR_INVALID_STACK_OPERATION)
+            return setStackSizeError(i)
           }
 
           let fSuccess = true
@@ -917,6 +1181,8 @@ export const evalScript = (
             const vchPubKey = stacktop(-ikey)!
 
             const fOk = vchSig.length > 0 && vchPubKey.length > 0
+
+            checkSignaturePubkeyWarnings(vchSig, vchPubKey, false)
 
             if (fOk) {
               isig++
@@ -944,9 +1210,13 @@ export const evalScript = (
           // so optionally verify it is exactly equal to zero prior
           // to removing it from the stack.
           if (stack.length === 0) {
-            return setError(SCRIPT_ERR_INVALID_STACK_OPERATION)
+            return setError(
+              SCRIPT_ERR_INVALID_STACK_OPERATION,
+              'OP_CHECKMULTISIG requires a dummy stack item',
+            )
           }
           if (stacktop(-1)!.length > 0) {
+            loopHighlight = { count: 1, color: 'error' }
             return setError(SCRIPT_ERR_SIG_NULLDUMMY)
           }
           popstack()
@@ -957,20 +1227,64 @@ export const evalScript = (
             if (fSuccess) {
               popstack()
             } else {
+              loopHighlight = { count: 1, color: 'error' }
               return setError(SCRIPT_ERR_CHECKMULTISIGVERIFY)
             }
+          } else {
+            loopHighlight = { count: 1, color: 'success' }
           }
         }
         break
 
       default:
-        return setError(SCRIPT_ERR_BAD_OPCODE)
+        return setError(SCRIPT_ERR_BAD_OPCODE, 'unknown opcode')
+    }
+
+    if (fExec && opcode !== OP_ELSE && opcode !== OP_ENDIF) {
+      usedOpcodes.add(opcode)
+      steps.push({
+        position: loopStartReaderPosition,
+        stack: [...stack],
+        highlight: loopHighlight,
+      })
     }
   }
 
   if (!vfExec.empty()) {
-    return setError(SCRIPT_ERR_UNBALANCED_CONDITIONAL)
+    return setError(
+      SCRIPT_ERR_UNBALANCED_CONDITIONAL,
+      'missing OP_ENDIF at the end of script',
+    )
   }
 
-  return { stack }
+  if (
+    (usedOpcodes.has(OP_CHECKMULTISIG) ||
+      usedOpcodes.has(OP_CHECKMULTISIGVERIFY)) &&
+    usedOpcodes.has(OP_CHECKSIGADD)
+  ) {
+    warnings.add(ScriptWarning.mixedCheckMultisigAndCheckSigAdd)
+  } else {
+    if (usedSigTypes.size > 1 && usedPubkeyTypes.size > 1) {
+      warnings.add('script mixes incompatible signature and public key types')
+    } else if (usedSigTypes.has('der') && usedPubkeyTypes.has('xonly')) {
+      warnings.add('script mixes DER signatures with x-only public keys')
+    } else if (
+      usedSigTypes.has('schnorr') &&
+      usedPubkeyTypes.has('pretapscript')
+    ) {
+      warnings.add(
+        'script mixes Schnorr signatures with compressed/uncompressed public keys',
+      )
+    }
+  }
+  if (stack.length > 0 && !castToBool(stacktop()!)) {
+    warnings.add(ScriptWarning.falseTopStackItem)
+  }
+  if (stack.length === 0) {
+    warnings.add(ScriptWarning.emptyStack)
+  } else if (stack.length > 1) {
+    warnings.add(ScriptWarning.dirtyStack)
+  }
+
+  return { stack, steps, warnings: getWarningMessages() }
 }

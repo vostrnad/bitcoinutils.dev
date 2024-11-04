@@ -316,3 +316,15 @@ export const serializeDERSignature = (
 
   return sig
 }
+
+export const isValidSchnorrSignature = (sig: Uint8Array): boolean => {
+  return sig.length === 64 || (sig.length === 65 && sig[64] in sighashNames)
+}
+
+export const isValidDERSignature = (sig: Uint8Array): boolean => {
+  return tryDecodeDERSignature(sig).error === undefined
+}
+
+export const isAnyKnownSignature = (sig: Uint8Array): boolean => {
+  return isValidSchnorrSignature(sig) || isValidDERSignature(sig)
+}

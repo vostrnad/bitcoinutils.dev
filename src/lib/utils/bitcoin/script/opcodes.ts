@@ -6,7 +6,7 @@ export const OP_PUSHBYTES_1 = 0x01
 export const OP_PUSHBYTES_75 = 0x4b
 
 export const OP_PUSHDATA1 = 0x4c
-//           OP_PUSHDATA2 = 0x4d
+export const OP_PUSHDATA2 = 0x4d
 export const OP_PUSHDATA4 = 0x4e
 
 export const OP_1 = 0x51
@@ -149,6 +149,8 @@ const opcodes: Array<[string, number | string]> = opcodesShort.map(
   ],
 )
 
+export const opcodeNames = opcodes.map(([opcode]) => opcode)
+
 const filterNumberOpcodes = (
   item: [string, number | string],
 ): item is [string, number] => {
@@ -172,3 +174,16 @@ const nonPushOpcodesByNumber = new Map<number, string>(
 
 export const getNonPushOpcodeName = (opcode: number): string | undefined =>
   nonPushOpcodesByNumber.get(opcode)
+
+const opcodesByName = new Map<string, number>()
+opcodes.forEach(([name, value]) => {
+  if (typeof value === 'number') {
+    opcodesByName.set(name, value)
+  } else {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    opcodesByName.set(name, opcodesByName.get(value)!)
+  }
+})
+
+export const getOpcodeByName = (opcode: string): number | undefined =>
+  opcodesByName.get(opcode)

@@ -121,10 +121,10 @@
 </script>
 
 <svelte:head>
-  <title>Script - bitcoinutils.dev</title>
+  <title>Script decoder - bitcoinutils.dev</title>
 </svelte:head>
 
-<h2 class="mb-3">Script</h2>
+<h2 class="mb-3">Script decoder</h2>
 <p>This tool will decode a Bitcoin script from a hexadecimal input.</p>
 
 <FormGroup>

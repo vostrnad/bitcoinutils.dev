@@ -38,6 +38,19 @@ export const bytesToUIntLE = (array: Uint8Array): number => {
   return sum(Array.from(array).map((byte, index) => byte * 256 ** index))
 }
 
+export const uintLEToBytesFixed = (
+  n: number | bigint,
+  size: number,
+): Uint8Array => {
+  n = BigInt(n)
+  const array: number[] = []
+  for (let i = 0; i < size; i++) {
+    array.push(Number(n & 0xffn))
+    n >>= 8n
+  }
+  return new Uint8Array(array)
+}
+
 export const intLEToBytes = (n: number | bigint): Uint8Array => {
   n = BigInt(n)
   if (n === 0n) return new Uint8Array()
