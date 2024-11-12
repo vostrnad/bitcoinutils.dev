@@ -64,6 +64,7 @@ export const getCaretCoordinates = (
 
   // Default textarea styles
   style.whiteSpace = 'pre-wrap'
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   if (!isInput) style.wordWrap = 'break-word' // only for textarea-s
 
   // Position off-screen

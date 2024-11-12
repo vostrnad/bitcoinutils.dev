@@ -1,10 +1,10 @@
 import { describe, expect, test } from 'vitest'
-import { invalidScripts, validScripts } from './testcases'
 import {
   type DecodeOptions,
   decodeScript,
 } from '$lib/utils/bitcoin/script/decode'
 import { OutOfRangeError, hexToBytes } from '$lib/utils/uintarray'
+import { invalidScripts, validScripts } from './testcases'
 
 describe('decodeScript', () => {
   test('should decode valid scripts in debugger format', () => {

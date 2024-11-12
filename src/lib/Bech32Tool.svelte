@@ -21,8 +21,8 @@
 
   export let encoding: 'bech32' | 'bech32m'
 
-  const segwitPrefixes = ['bc', 'tb', 'bcrt']
-  const silentPaymentsPrefixes = ['sp', 'tsp', 'sprt']
+  const segwitPrefixes = new Set(['bc', 'tb', 'bcrt'])
+  const silentPaymentsPrefixes = new Set(['sp', 'tsp', 'sprt'])
 
   let encodingName: string
   let encoder: typeof bech32 | typeof bech32m
@@ -31,7 +31,7 @@
     encoder = encoding === 'bech32' ? bech32 : bech32m
   }
 
-  if (segwitPrefixes.includes($hrp.toLowerCase())) {
+  if (segwitPrefixes.has($hrp.toLowerCase())) {
     if (encoding === 'bech32' && $versionNumber === 1) {
       $versionNumber = 0
     }
@@ -45,7 +45,7 @@
   $: {
     invalidVersionReason = undefined
     if (typeof $versionNumber === 'number') {
-      if (segwitPrefixes.includes($hrp.toLowerCase())) {
+      if (segwitPrefixes.has($hrp.toLowerCase())) {
         if (encoding === 'bech32' && $versionNumber !== 0) {
           invalidVersionReason = 'SegWit versions higher than 0 use Bech32m'
         }
@@ -86,7 +86,7 @@
       invalidHrpReason = 'Human-readable part is too long'
     } else if (
       encoding === 'bech32' &&
-      silentPaymentsPrefixes.includes($hrp.toLowerCase())
+      silentPaymentsPrefixes.has($hrp.toLowerCase())
     ) {
       invalidHrpReason = 'Silent payment addresses use Bech32m'
     }

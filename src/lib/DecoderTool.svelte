@@ -1,7 +1,7 @@
 <script lang="ts">
   import { FormGroup, Input } from '@sveltestrap/sveltestrap'
-  import { decoderInput as input } from './stores/inputs'
   import Output from '$lib/Output.svelte'
+  import { decoderInput as input } from '$lib/stores/inputs'
   import { hexToBytes } from '$lib/utils/uintarray'
   import { isValidHex } from '$lib/utils/validation'
 

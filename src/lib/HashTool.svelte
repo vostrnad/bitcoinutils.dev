@@ -2,8 +2,8 @@
   import { FormGroup, Input } from '@sveltestrap/sveltestrap'
   import { getContext } from 'svelte'
   import type { Writable } from 'svelte/store'
-  import { hashInput as input } from './stores/inputs'
   import Output from '$lib/Output.svelte'
+  import { hashInput as input } from '$lib/stores/inputs'
   import { bytesToHex, hexToBytes } from '$lib/utils/uintarray'
   import { isValidHex } from '$lib/utils/validation'
 
@@ -23,7 +23,7 @@
         case 'hex':
           output = bytesToHex(hash(hexToBytes($input)))
           break
-        default:
+        case 'utf8':
           output = bytesToHex(hash($input))
       }
     }

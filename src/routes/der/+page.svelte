@@ -21,15 +21,35 @@
 
   let isValidAsHex: boolean
 
-  let rString = ''
-  let sString = ''
-  let sighashString = ''
+  let rString: string
+  let sString: string
+  let sighashString: string
 
   let highlighted: 'r' | 's' | 'sighash' | undefined = undefined
 
   let decodeRes: DecodeDERSignatureResult | undefined = undefined
 
   let invalidReason: string | undefined
+
+  let highlights: Array<{
+    index: number
+    length: number
+    color: string
+  }> = []
+
+  const setHighlight = (start: number, end: number) => {
+    highlights = [
+      {
+        index: start * 2,
+        length: (end - start) * 2,
+        color: 'var(--highlight-primary)',
+      },
+    ]
+  }
+
+  const clearHighlight = () => {
+    highlights = []
+  }
 
   $: {
     invalidReason = undefined
@@ -79,7 +99,7 @@
             clearHighlight()
           }
           break
-        default:
+        case undefined:
           clearHighlight()
       }
     } else {
@@ -89,26 +109,6 @@
       sighashString = ''
       invalidReason = 'Input is not valid hex'
     }
-  }
-
-  let highlights: Array<{
-    index: number
-    length: number
-    color: string
-  }> = []
-
-  const setHighlight = (start: number, end: number) => {
-    highlights = [
-      {
-        index: start * 2,
-        length: (end - start) * 2,
-        color: 'var(--highlight-primary)',
-      },
-    ]
-  }
-
-  const clearHighlight = () => {
-    highlights = []
   }
 </script>
 

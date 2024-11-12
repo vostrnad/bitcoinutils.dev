@@ -84,6 +84,7 @@
   }
 
   $: if (shouldCheckForNewCurrentToken) {
+    // eslint-disable-next-line no-useless-assignment
     shouldCheckForNewCurrentToken = false
 
     const token = tokenizedInput.findLast(

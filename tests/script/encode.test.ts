@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'
-import { validSymmetricScripts } from './testcases'
 import { encodeScript } from '$lib/utils/bitcoin/script/encode'
 import { bytesToHex } from '$lib/utils/uintarray'
+import { validSymmetricScripts } from './testcases'
 
 describe('encodeScript', () => {
   test('should encode valid minimal scripts', () => {

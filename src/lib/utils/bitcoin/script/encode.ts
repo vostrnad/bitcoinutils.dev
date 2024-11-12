@@ -1,4 +1,10 @@
 import {
+  concatBytes,
+  hexToBytes,
+  uintLEToBytesFixed,
+} from '$lib/utils/uintarray'
+import { isValidHex } from '$lib/utils/validation'
+import {
   OP_0,
   OP_1NEGATE,
   OP_PUSHDATA1,
@@ -6,12 +12,6 @@ import {
   OP_PUSHDATA4,
   getOpcodeByName,
 } from './opcodes'
-import {
-  concatBytes,
-  hexToBytes,
-  uintLEToBytesFixed,
-} from '$lib/utils/uintarray'
-import { isValidHex } from '$lib/utils/validation'
 
 const bytesToMinimalPush = (bytes: Uint8Array): Uint8Array => {
   if (bytes.length === 0) {

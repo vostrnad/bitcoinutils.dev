@@ -54,7 +54,7 @@
     },
   }
 
-  let preset = 'core'
+  let preset: string
 
   let newlines = false
   let showPushOps: 'all' | 'numeric' | 'none' = 'none'

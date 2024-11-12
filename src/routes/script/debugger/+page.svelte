@@ -40,6 +40,7 @@
         })
         asmInput = decodedScript
         hexInputValid = true
+        // eslint-disable-next-line no-useless-assignment
         asmInputValid = true
       } catch {
         hexInputValid = false
@@ -53,6 +54,7 @@
     try {
       scriptBytes = encodeScript(asmInput)
       $hexInput = bytesToHex(scriptBytes)
+      // eslint-disable-next-line no-useless-assignment
       decodedScript = asmInput
       asmInputValid = true
       hexInputValid = true

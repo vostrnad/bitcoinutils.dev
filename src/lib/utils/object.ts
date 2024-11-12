@@ -1,5 +1,6 @@
 export const mapObject = <
   T extends Record<string | number | symbol, unknown>,
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
   TK extends keyof T,
   U extends Record<string | number | symbol, unknown>,
   UK extends keyof U,

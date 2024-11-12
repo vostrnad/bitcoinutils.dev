@@ -1,4 +1,11 @@
 import {
+  OutOfRangeError,
+  Uint8ArrayReader,
+  bytesToHex,
+  bytesToIntLE,
+  bytesToUIntLE,
+} from '$lib/utils/uintarray'
+import {
   OP_0,
   OP_1,
   OP_16,
@@ -9,13 +16,6 @@ import {
   OP_PUSHDATA4,
   getNonPushOpcodeName,
 } from './opcodes'
-import {
-  OutOfRangeError,
-  Uint8ArrayReader,
-  bytesToHex,
-  bytesToIntLE,
-  bytesToUIntLE,
-} from '$lib/utils/uintarray'
 
 export const range = (min: number, max: number): number[] => {
   const res: number[] = []
