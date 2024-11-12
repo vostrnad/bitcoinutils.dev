@@ -240,7 +240,7 @@
             behavior: 'instant',
           })
       }
-      if (e.key === 'Enter' && selectedSuggestion) {
+      if ((e.key === 'Enter' || e.key === 'Tab') && selectedSuggestion) {
         e.preventDefault()
         applySuggestion(selectedSuggestion)
       }
