@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { bech32, bech32m } from '@scure/base'
+  import { type Bech32, bech32, bech32m } from '@scure/base'
   import { FormGroup, Input, Label } from '@sveltestrap/sveltestrap'
   import IntegerInput from '$lib/IntegerInput.svelte'
   import Output from '$lib/Output.svelte'
@@ -25,7 +25,7 @@
   const silentPaymentsPrefixes = new Set(['sp', 'tsp', 'sprt'])
 
   let encodingName: string
-  let encoder: typeof bech32 | typeof bech32m
+  let encoder: Bech32
   $: {
     encodingName = encoding === 'bech32' ? 'Bech32' : 'Bech32m'
     encoder = encoding === 'bech32' ? bech32 : bech32m
