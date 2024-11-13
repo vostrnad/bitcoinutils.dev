@@ -5,6 +5,7 @@
     TabContent,
     TabPane,
   } from '@sveltestrap/sveltestrap'
+  import InputLength from '$lib/InputLength.svelte'
   import SyntaxInput from '$lib/SyntaxInput.svelte'
   import { scriptInput as hexInput } from '$lib/stores/inputs'
   import { decodeScript } from '$lib/utils/bitcoin/script/decode'
@@ -93,26 +94,29 @@
   >.
 </p>
 
-<TabContent>
-  <TabPane tabId="code" tab="Script" active>
-    <FormGroup>
+<FormGroup>
+  <TabContent>
+    <TabPane tabId="code" tab="Script" active>
       <SyntaxInput
         invalid={!asmInputValid}
         bind:value={asmInput}
         bind:height={inputHeight}
       />
-    </FormGroup>
-  </TabPane>
-  <TabPane tabId="assembly" tab="Assembly">
-    <FormGroup>
+    </TabPane>
+    <TabPane tabId="assembly" tab="Assembly">
       <SyntaxInput
         invalid={!hexInputValid}
         bind:value={$hexInput}
         bind:height={inputHeight}
       />
-    </FormGroup>
-  </TabPane>
-</TabContent>
+    </TabPane>
+  </TabContent>
+  <InputLength
+    bind:input={$hexInput}
+    type="hex"
+    isValid={hexInputValid && asmInputValid}
+  />
+</FormGroup>
 
 {#if evalScriptResult || !isValid}
   <Alert color={!isValid || evalScriptResult?.error ? 'danger' : 'success'}
