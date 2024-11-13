@@ -11,6 +11,8 @@
 
   export let invalid = false
 
+  export let type: 'asm' | 'hex'
+
   interface Token {
     text: string
     position: number
@@ -26,7 +28,7 @@
   let currentlyEditingToken: Token | undefined
 
   let suggestedOpcodes: string[] = []
-  $: if (currentlyEditingToken) {
+  $: if (type === 'asm' && currentlyEditingToken) {
     const tokenUpper = currentlyEditingToken.text.toUpperCase()
     suggestedOpcodes = opcodeNames
       .filter((opcode) => opcode.includes(tokenUpper))
@@ -62,7 +64,7 @@
     for (const match of (value || '').matchAll(/\S+/g)) {
       const token = match[0]
       let color: string | undefined
-      if (token.startsWith('OP_')) {
+      if (type === 'asm' && token.startsWith('OP_')) {
         color = 'var(--syntax-code)'
       } else if (/^[\da-f]+$/i.test(token)) {
         color = 'var(--syntax-data)'

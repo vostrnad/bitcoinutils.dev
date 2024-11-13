@@ -98,6 +98,7 @@
   <TabContent>
     <TabPane tabId="code" tab="Script" active>
       <SyntaxInput
+        type="asm"
         invalid={!asmInputValid}
         bind:value={asmInput}
         bind:height={inputHeight}
@@ -105,6 +106,7 @@
     </TabPane>
     <TabPane tabId="assembly" tab="Assembly">
       <SyntaxInput
+        type="hex"
         invalid={!hexInputValid}
         bind:value={$hexInput}
         bind:height={inputHeight}
