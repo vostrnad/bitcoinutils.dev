@@ -52,7 +52,7 @@
     const serialized = serializeCustomSequence(
       $items.map((item) => item.preset),
     )
-    void goto(serialized ? `?s=${serialized}` : '?')
+    void goto(serialized ? `?s=${serialized}` : '?', { noScroll: true })
   }
 
   // if clicked on menu item, restore URL parameter
