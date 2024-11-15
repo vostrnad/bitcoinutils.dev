@@ -148,7 +148,7 @@
     {/if}
   {/if}
 
-  <div class="d-flex flex-row flex-wrap" style="gap: 8px;">
+  <div class="steps">
     {#each evalScriptResult.steps.slice(1) as step (step.position)}
       {@const opcode = scriptBytes[step.position]}
       {@const topStackItem = step.stack.at(-1)}
@@ -191,9 +191,76 @@
 {/if}
 
 <style>
+  .steps {
+    --gap: 8px;
+    --columns: 2;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    column-gap: var(--gap);
+    row-gap: 1rem;
+  }
+
+  @media (min-width: 576px) {
+    .steps {
+      --columns: 3;
+    }
+  }
+  @media (min-width: 768px) {
+    .steps {
+      --columns: 2;
+    }
+  }
+  @media (min-width: 992px) {
+    .steps {
+      --columns: 3;
+    }
+  }
+  @media (min-width: 1200px) {
+    .steps {
+      --columns: 4;
+    }
+  }
+  @media (min-width: 1400px) {
+    .steps {
+      --columns: 5;
+    }
+  }
+
+  /*
+    Container queries are preferred to
+    media queries in supported browsers:
+  */
+  @container (min-width: 0) {
+    .steps {
+      --columns: 2;
+    }
+  }
+  @container (min-width: 576px) {
+    .steps {
+      --columns: 3;
+    }
+  }
+  @container (min-width: 768px) {
+    .steps {
+      --columns: 4;
+    }
+  }
+  @container (min-width: 960px) {
+    .steps {
+      --columns: 5;
+    }
+  }
+  @container (min-width: 1152px) {
+    .steps {
+      --columns: 6;
+    }
+  }
+
   .step {
-    flex-basis: 12rem;
-    max-width: 12rem;
+    width: calc(
+      (100% / var(--columns)) - var(--gap) + (var(--gap) / var(--columns))
+    );
     display: flex;
     flex-direction: column;
     gap: 0.125rem;

@@ -64,6 +64,7 @@
       style:opacity={$navigating ? '0.2' : '1'}
       style:pointer-events={$navigating ? 'none' : 'initial'}
       style:user-select={$navigating ? 'none' : 'initial'}
+      style:container-type="inline-size"
       class="flex-grow-1 p-3 pt-4 p-md-5 pt-md-5"
     >
       <slot />
