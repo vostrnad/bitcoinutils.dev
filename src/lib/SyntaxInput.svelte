@@ -25,6 +25,7 @@
   let cursorPosition = 0
 
   let shouldCheckForNewCurrentToken = false
+  let preventNewCurrentTokenCheck = false
   let currentlyEditingToken: Token | undefined
 
   let suggestedOpcodes: string[] = []
@@ -86,15 +87,19 @@
   }
 
   $: if (shouldCheckForNewCurrentToken) {
+    if (!preventNewCurrentTokenCheck) {
+      const token = tokenizedInput.findLast(
+        ({ position }) => position < cursorPosition,
+      )
+      if (token !== currentlyEditingToken) {
+        currentlyEditingToken = token
+      }
+    }
+
     // eslint-disable-next-line no-useless-assignment
     shouldCheckForNewCurrentToken = false
-
-    const token = tokenizedInput.findLast(
-      ({ position }) => position < cursorPosition,
-    )
-    if (token !== currentlyEditingToken) {
-      currentlyEditingToken = token
-    }
+    // eslint-disable-next-line no-useless-assignment
+    preventNewCurrentTokenCheck = false
   }
 
   export let width = 0
@@ -251,6 +256,9 @@
         selectedSuggestion = undefined
         suggestedOpcodes = []
       }
+    }}
+    on:paste={() => {
+      preventNewCurrentTokenCheck = true
     }}
     on:input={() => {
       cursorPosition = textareaElement.selectionStart
