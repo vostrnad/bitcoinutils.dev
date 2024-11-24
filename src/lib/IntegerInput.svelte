@@ -12,11 +12,14 @@
 
   export let invalidReason: string | undefined = undefined
 
-  let internalValue: number | null
+  let internalValue: number | string | null
 
   $: internalValue = value
 
   $: {
+    if (typeof internalValue === 'string' && internalValue.length > 0) {
+      internalValue = Number(internalValue)
+    }
     if (typeof internalValue === 'number') {
       if (internalValue > max) internalValue = max
       if (internalValue < min) internalValue = min

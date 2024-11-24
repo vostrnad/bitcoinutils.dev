@@ -1,0 +1,86 @@
+diff --git a/node_modules/@sveltestrap/sveltestrap/dist/Input/Input.svelte b/node_modules/@sveltestrap/sveltestrap/dist/Input/Input.svelte
+index c39373f..4b4372c 100644
+--- a/node_modules/@sveltestrap/sveltestrap/dist/Input/Input.svelte
++++ b/node_modules/@sveltestrap/sveltestrap/dist/Input/Input.svelte
+@@ -237,14 +237,6 @@
+       [`btn-${bsSize}`]: bsSize && isBtn
+     });
+   }
+-
+-  const handleInput = ({ target }) => {
+-    if (target.type === 'number' || target.type === 'range') {
+-      value = Number(target.value);
+-    } else {
+-      value = target.value;
+-    }
+-  };
+ </script>
+ 
+ {#if tag === 'input'}
+@@ -385,11 +377,9 @@
+       bind:value
+       bind:this={inner}
+       on:blur
+-      on:change={handleInput}
+       on:change
+       on:click
+       on:focus
+-      on:input={handleInput}
+       on:input
+       on:keydown
+       on:keypress
+@@ -410,11 +400,9 @@
+       class={classes}
+       {type}
+       on:blur
+-      on:change={handleInput}
+       on:change
+       on:click
+       on:focus
+-      on:input={handleInput}
+       on:input
+       on:keydown
+       on:keypress
+diff --git a/node_modules/@sveltestrap/sveltestrap/src/Input/Input.svelte b/node_modules/@sveltestrap/sveltestrap/src/Input/Input.svelte
+index c39373f..4b4372c 100644
+--- a/node_modules/@sveltestrap/sveltestrap/src/Input/Input.svelte
++++ b/node_modules/@sveltestrap/sveltestrap/src/Input/Input.svelte
+@@ -237,14 +237,6 @@
+       [`btn-${bsSize}`]: bsSize && isBtn
+     });
+   }
+-
+-  const handleInput = ({ target }) => {
+-    if (target.type === 'number' || target.type === 'range') {
+-      value = Number(target.value);
+-    } else {
+-      value = target.value;
+-    }
+-  };
+ </script>
+ 
+ {#if tag === 'input'}
+@@ -385,11 +377,9 @@
+       bind:value
+       bind:this={inner}
+       on:blur
+-      on:change={handleInput}
+       on:change
+       on:click
+       on:focus
+-      on:input={handleInput}
+       on:input
+       on:keydown
+       on:keypress
+@@ -410,11 +400,9 @@
+       class={classes}
+       {type}
+       on:blur
+-      on:change={handleInput}
+       on:change
+       on:click
+       on:focus
+-      on:input={handleInput}
+       on:input
+       on:keydown
+       on:keypress
