@@ -78,7 +78,8 @@
 
     const hrpHasInvalidCharacters = !isValidBech32Hrp($hrp)
     if ($hrp.length === 0) {
-      invalidHrpReason = 'Human-readable part cannot be empty'
+      invalidHrpReason = ''
+      invalidReason = 'Human-readable part cannot be empty'
     } else if (hrpHasInvalidCharacters) {
       invalidHrpReason = ''
       invalidReason = 'Human-readable part has invalid characters'
