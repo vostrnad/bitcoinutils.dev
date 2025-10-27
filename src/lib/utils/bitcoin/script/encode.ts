@@ -13,7 +13,7 @@ import {
   getOpcodeByName,
 } from './opcodes'
 
-const bytesToMinimalPush = (bytes: Uint8Array): Uint8Array => {
+export const bytesToMinimalPush = (bytes: Uint8Array): Uint8Array => {
   if (bytes.length === 0) {
     return concatBytes([OP_0])
   }

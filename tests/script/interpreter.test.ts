@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import { createArray } from '$lib/utils/array'
+import { bytesToMinimalPush } from '$lib/utils/bitcoin/script/encode'
 import { evalScript } from '$lib/utils/bitcoin/script/interpreter'
 import {
   OP_0NOTEQUAL,
@@ -269,5 +270,16 @@ describe('evalScript', () => {
       expect(resIncorrect).toHaveProperty('error')
       expect(resIncorrect.error?.code).toBe(17)
     })
+  })
+
+  test('should return error for stack items over 520 bytes', () => {
+    const item = new Uint8Array(521)
+
+    const resIncorrect = evalScript(bytesToMinimalPush(item), [])
+    expect(resIncorrect).toHaveProperty('error')
+    expect(resIncorrect.error?.code).toBe(5)
+
+    const resCorrect = evalScript(bytesToMinimalPush(item.slice(1)), [])
+    expect(resCorrect).not.toHaveProperty('error')
   })
 })

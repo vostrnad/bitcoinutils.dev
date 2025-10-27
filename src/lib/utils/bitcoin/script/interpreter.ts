@@ -137,10 +137,12 @@ import {
   uint8ArrayEqual,
 } from '$lib/utils/uintarray'
 
+const MAX_SCRIPT_ELEMENT_SIZE = 520
 const MAX_PUBKEYS_PER_MULTISIG = 20
 
 const SCRIPT_ERR_UNKNOWN_ERROR = 1
 const SCRIPT_ERR_OP_RETURN = 3
+const SCRIPT_ERR_PUSH_SIZE = 5
 const SCRIPT_ERR_SIG_COUNT = 8
 const SCRIPT_ERR_PUBKEY_COUNT = 9
 const SCRIPT_ERR_VERIFY = 10
@@ -159,6 +161,7 @@ const SCRIPT_ERR_SIG_NULLDUMMY = 27
 const errorMessageMap = {
   [SCRIPT_ERR_UNKNOWN_ERROR]: 'unknown error',
   [SCRIPT_ERR_OP_RETURN]: 'OP_RETURN encountered during execution',
+  [SCRIPT_ERR_PUSH_SIZE]: 'push value size limit exceeded',
   [SCRIPT_ERR_SIG_COUNT]: 'invalid signature count',
   [SCRIPT_ERR_PUBKEY_COUNT]: 'invalid pubkey count',
   [SCRIPT_ERR_VERIFY]: 'OP_VERIFY operation failed',
@@ -451,6 +454,9 @@ export const evalScript = (
 
       if (reader.position + pushBytes > script.length) {
         return setError(SCRIPT_ERR_BAD_OPCODE)
+      }
+      if (pushBytes > MAX_SCRIPT_ELEMENT_SIZE) {
+        return setError(SCRIPT_ERR_PUSH_SIZE)
       }
 
       const pushValue = reader.read(pushBytes)
