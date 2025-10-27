@@ -16,6 +16,7 @@ import {
   OP_ADD,
   OP_BOOLAND,
   OP_BOOLOR,
+  OP_CAT,
   OP_CHECKLOCKTIMEVERIFY,
   OP_CHECKMULTISIG,
   OP_CHECKMULTISIGVERIFY,
@@ -165,8 +166,8 @@ describe('evalScript', () => {
 
   test('should return error for incorrect scripts', () => {
     const testcases: Array<[string, string[], number]> = [
-      // disabled opcode OP_CAT
-      ['7e', [], 16],
+      // disabled opcode OP_SUBSTR
+      ['7f', [], 16],
       // incomplete push
       ['01', [], 15],
       ['4c', [], 15],
@@ -211,6 +212,7 @@ describe('evalScript', () => {
       [OP_SWAP, 2],
       [OP_TUCK, 2],
 
+      [OP_CAT, 2],
       [OP_SIZE, 1],
 
       [OP_EQUAL, 2],

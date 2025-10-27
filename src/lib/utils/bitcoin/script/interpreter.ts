@@ -133,6 +133,7 @@ import {
   bytesToHex,
   bytesToIntLE,
   bytesToUIntLE,
+  concatBytes,
   intLEToBytes,
   uint8ArrayEqual,
 } from '$lib/utils/uintarray'
@@ -188,6 +189,7 @@ enum ScriptWarning {
   codeseparator,
   mixedCheckMultisigAndCheckSigAdd,
   nonMinimalIf,
+  cat,
 }
 
 const warningMessageMap: Record<ScriptWarning, string> = {
@@ -201,6 +203,7 @@ const warningMessageMap: Record<ScriptWarning, string> = {
   [ScriptWarning.mixedCheckMultisigAndCheckSigAdd]:
     'OP_CHECKMULTISIG and OP_CHECKSIGADD cannot be used in the same script',
   [ScriptWarning.nonMinimalIf]: 'argument of OP_IF/NOTIF is not minimal',
+  [ScriptWarning.cat]: 'OP_CAT is only available on signet',
 }
 
 type ScriptErrorCode = keyof typeof errorMessageMap
@@ -417,7 +420,7 @@ export const evalScript = (
     const opcode = reader.readByte()
 
     if (
-      opcode === OP_CAT ||
+      // opcode === OP_CAT ||
       opcode === OP_SUBSTR ||
       opcode === OP_LEFT ||
       opcode === OP_RIGHT ||
@@ -820,6 +823,23 @@ export const evalScript = (
           const vch = stacktop()!
           stack.splice(-2, 0, vch)
           loopHighlight = { count: 3, color: 'stack' }
+        }
+        break
+
+      case OP_CAT:
+        {
+          if (stack.length < 2) {
+            return setStackSizeError(2)
+          }
+          const vch1 = stacktop(-2)!
+          const vch2 = stacktop(-1)!
+          if (vch1.length + vch2.length > MAX_SCRIPT_ELEMENT_SIZE) {
+            return setError(SCRIPT_ERR_PUSH_SIZE)
+          }
+          popstack()
+          popstack()
+          stack.push(concatBytes([vch1, vch2]))
+          loopHighlight = { count: 1, color: 'success' }
         }
         break
 
